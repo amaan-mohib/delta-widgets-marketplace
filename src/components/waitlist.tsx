@@ -9,11 +9,14 @@ import {
   Field,
   FieldProps,
   Input,
+  Spinner,
   Title2,
   Title3,
   tokens,
 } from "@fluentui/react-components";
+import { CheckmarkFilled } from "@fluentui/react-icons";
 import { useState } from "react";
+import z from "zod";
 
 interface WaitlistPageProps {}
 
@@ -22,17 +25,36 @@ const WaitlistPage: React.FC<WaitlistPageProps> = () => {
   const [validationMessage, setValidationMessage] = useState("");
   const [validationState, setValidationState] =
     useState<FieldProps["validationState"]>("none");
+  const [loading, setLoading] = useState(false);
+  const [loadingIcon, setLoadingIcon] = useState<any>(null);
 
   const onSubmit = async () => {
-    if (!email || !email.trim()) return;
+    if (!email || !email.trim() || loading) return;
 
     try {
+      // validate here itself to avoid server action call
+      const validation = z.email().safeParse(email);
+      if (!validation.success) {
+        setValidationMessage("Please enter a valid email");
+        setValidationState("error");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setLoadingIcon(<Spinner size="tiny" />);
+
       const { message, state } = await submitWaitlist(email);
+
       setValidationMessage(message);
       setValidationState(state);
+      setLoadingIcon(state === "success" ? <CheckmarkFilled /> : null);
+      setLoading(false);
     } catch (error) {
       setValidationMessage("Something went wrong");
       setValidationState("error");
+      setLoadingIcon(null);
+      setLoading(false);
     }
   };
 
@@ -61,6 +83,7 @@ const WaitlistPage: React.FC<WaitlistPageProps> = () => {
               if (validationMessage) {
                 setValidationMessage("");
                 setValidationState("none");
+                setLoadingIcon(null);
               }
               setEmail(value);
             }}
@@ -74,7 +97,11 @@ const WaitlistPage: React.FC<WaitlistPageProps> = () => {
           />
         </Field>
         <div>
-          <Button appearance="primary" onClick={onSubmit}>
+          <Button
+            disabled={loading}
+            appearance="primary"
+            onClick={onSubmit}
+            icon={loadingIcon}>
             Get notified
           </Button>
         </div>
