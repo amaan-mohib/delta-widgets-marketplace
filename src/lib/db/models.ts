@@ -1,0 +1,112 @@
+import db from ".";
+import {
+  Table,
+  NeonAuthAccount,
+  NeonAuthInvitation,
+  NeonAuthJwks,
+  NeonAuthMember,
+  NeonAuthOrganization,
+  NeonAuthProjectConfig,
+  NeonAuthSession,
+  NeonAuthUser,
+  NeonAuthVerification,
+  Assets,
+  Categories,
+  KnexMigrations,
+  KnexMigrationsLock,
+  UserProfiles,
+  Waitlists,
+  WidgetAssets,
+  WidgetCategories,
+  WidgetLikes,
+  WidgetVersionAssets,
+  WidgetVersions,
+  Widgets,
+} from "./types";
+
+const models = {
+  NeonAuthAccount: (alias?: string) =>
+    db<NeonAuthAccount>(
+      alias ? { [alias]: Table.NeonAuthAccount } : Table.NeonAuthAccount,
+    ),
+  NeonAuthInvitation: (alias?: string) =>
+    db<NeonAuthInvitation>(
+      alias ? { [alias]: Table.NeonAuthInvitation } : Table.NeonAuthInvitation,
+    ),
+  NeonAuthJwks: (alias?: string) =>
+    db<NeonAuthJwks>(
+      alias ? { [alias]: Table.NeonAuthJwks } : Table.NeonAuthJwks,
+    ),
+  NeonAuthMember: (alias?: string) =>
+    db<NeonAuthMember>(
+      alias ? { [alias]: Table.NeonAuthMember } : Table.NeonAuthMember,
+    ),
+  NeonAuthOrganization: (alias?: string) =>
+    db<NeonAuthOrganization>(
+      alias
+        ? { [alias]: Table.NeonAuthOrganization }
+        : Table.NeonAuthOrganization,
+    ),
+  NeonAuthProjectConfig: (alias?: string) =>
+    db<NeonAuthProjectConfig>(
+      alias
+        ? { [alias]: Table.NeonAuthProjectConfig }
+        : Table.NeonAuthProjectConfig,
+    ),
+  NeonAuthSession: (alias?: string) =>
+    db<NeonAuthSession>(
+      alias ? { [alias]: Table.NeonAuthSession } : Table.NeonAuthSession,
+    ),
+  NeonAuthUser: (alias?: string) =>
+    db<NeonAuthUser>(
+      alias ? { [alias]: Table.NeonAuthUser } : Table.NeonAuthUser,
+    ),
+  NeonAuthVerification: (alias?: string) =>
+    db<NeonAuthVerification>(
+      alias
+        ? { [alias]: Table.NeonAuthVerification }
+        : Table.NeonAuthVerification,
+    ),
+  Assets: (alias?: string) =>
+    db<Assets>(alias ? { [alias]: Table.Assets } : Table.Assets),
+  Categories: (alias?: string) =>
+    db<Categories>(alias ? { [alias]: Table.Categories } : Table.Categories),
+  KnexMigrations: (alias?: string) =>
+    db<KnexMigrations>(
+      alias ? { [alias]: Table.KnexMigrations } : Table.KnexMigrations,
+    ),
+  KnexMigrationsLock: (alias?: string) =>
+    db<KnexMigrationsLock>(
+      alias ? { [alias]: Table.KnexMigrationsLock } : Table.KnexMigrationsLock,
+    ),
+  UserProfiles: (alias?: string) =>
+    db<UserProfiles>(
+      alias ? { [alias]: Table.UserProfiles } : Table.UserProfiles,
+    ),
+  Waitlists: (alias?: string) =>
+    db<Waitlists>(alias ? { [alias]: Table.Waitlists } : Table.Waitlists),
+  WidgetAssets: (alias?: string) =>
+    db<WidgetAssets>(
+      alias ? { [alias]: Table.WidgetAssets } : Table.WidgetAssets,
+    ),
+  WidgetCategories: (alias?: string) =>
+    db<WidgetCategories>(
+      alias ? { [alias]: Table.WidgetCategories } : Table.WidgetCategories,
+    ),
+  WidgetLikes: (alias?: string) =>
+    db<WidgetLikes>(alias ? { [alias]: Table.WidgetLikes } : Table.WidgetLikes),
+  WidgetVersionAssets: (alias?: string) =>
+    db<WidgetVersionAssets>(
+      alias
+        ? { [alias]: Table.WidgetVersionAssets }
+        : Table.WidgetVersionAssets,
+    ),
+  WidgetVersions: (alias?: string) =>
+    db<WidgetVersions>(
+      alias ? { [alias]: Table.WidgetVersions } : Table.WidgetVersions,
+    ),
+  Widgets: (alias?: string) =>
+    db<Widgets>(alias ? { [alias]: Table.Widgets } : Table.Widgets),
+};
+
+export default models;
