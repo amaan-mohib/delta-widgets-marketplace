@@ -15,6 +15,8 @@ export enum Table {
   Categories = "categories",
   KnexMigrations = "knex_migrations",
   KnexMigrationsLock = "knex_migrations_lock",
+  UploadJobFiles = "upload_job_files",
+  UploadJobs = "upload_jobs",
   UserProfiles = "user_profiles",
   Waitlists = "waitlists",
   WidgetAssets = "widget_assets",
@@ -39,6 +41,8 @@ export type Tables = {
   "categories": Categories,
   "knex_migrations": KnexMigrations,
   "knex_migrations_lock": KnexMigrationsLock,
+  "upload_job_files": UploadJobFiles,
+  "upload_jobs": UploadJobs,
   "user_profiles": UserProfiles,
   "waitlists": Waitlists,
   "widget_assets": WidgetAssets,
@@ -184,6 +188,26 @@ export type KnexMigrationsLock = {
   is_locked: number | null;
 };
 
+export type UploadJobFiles = {
+  id: number;
+  job_id: number;
+  status: string;
+  object_key: string;
+  file_name: string;
+  options: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type UploadJobs = {
+  id: number;
+  user_id: string;
+  widget_version_id: number;
+  status: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type UserProfiles = {
   id: number;
   user_id: string;
@@ -226,6 +250,7 @@ export type WidgetVersions = {
   created_at: Date;
   updated_at: Date;
   published_at: Date | null;
+  revision: number | null;
 };
 
 export type Widgets = {

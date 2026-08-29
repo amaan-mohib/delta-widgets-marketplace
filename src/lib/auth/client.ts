@@ -4,16 +4,18 @@ import { createAuthClient } from "@neondatabase/auth/next";
 
 export const authClient = createAuthClient();
 
-export const handleOAuthSignIn = async (provider: "google" | "github") => {
+export const handleOAuthSignIn = async (
+  provider: "google" | "github",
+  callbackURL?: string | null,
+) => {
   try {
     await authClient.signIn.social({
       provider,
-      callbackURL: window.location.origin,
-      // callbackURL: "/dashboard",
-      // newUserCallbackURL: "/welcome",
-      // errorCallbackURL: "/error",
+      callbackURL: callbackURL || "/dashboard",
+      newUserCallbackURL: "/dashboard/welcome",
+      errorCallbackURL: "/error",
     });
   } catch (error) {
-    console.error("Google sign-in error:", error);
+    console.error("OAuth sign-in error:", error);
   }
 };

@@ -1,6 +1,6 @@
 "use cache";
 
-import { APP_NAME } from "@/lib/utils";
+import { APP_NAME } from "@/lib/constants";
 import {
   IconBrandDiscord,
   IconBrandGithub,

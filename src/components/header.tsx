@@ -2,10 +2,16 @@
 
 import { Button } from "@fluentui/react-components";
 import Link from "next/link";
-import { APP_NAME } from "@/lib/utils";
-import { IconBrandDiscord, IconBrandGithub } from "@tabler/icons-react";
+import { APP_NAME } from "@/lib/constants";
+import { IconBrandDiscord, IconUpload } from "@tabler/icons-react";
+import { useMemo } from "react";
+import { isTauri } from "@tauri-apps/api/core";
 
 export function Header() {
+  const isInApp = useMemo(() => {
+    return isTauri();
+  }, []);
+
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,14 +46,19 @@ export function Header() {
               target="_blank"
               rel="noopener noreferrer"
             />
-            <Button as="a" href="https://deltawidgets.com/download">
-              Get {APP_NAME}
-            </Button>
-            {/* <div className="hidden sm:block">
-              <Button as="a" appearance="primary" href="/download">
+            {isInApp ? (
+              <Button
+                as="a"
+                appearance="primary"
+                href="/dashboard/upload"
+                icon={<IconUpload />}>
                 Upload
               </Button>
-            </div> */}
+            ) : (
+              <Button as="a" href="https://deltawidgets.com/download">
+                Get {APP_NAME}
+              </Button>
+            )}
           </div>
         </div>
       </div>

@@ -1,4 +1,17 @@
-export const APP_NAME = "Delta Widgets";
+"use client";
 
-export const WEBSITE_URL =
-  process.env.NEXT_PUBLIC_WEBSITE_URL || "https://delta-widgets.vercel.app";
+import { useEffect, useState } from "react";
+
+export function useDebounce<T>(value: T, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [value, delay]);
+
+  return debouncedValue;
+}

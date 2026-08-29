@@ -8,14 +8,24 @@
     "start": "next start",
     "lint": "eslint",
     "create:migration": "knex migrate:make",
-    "migrate": "knex migrate:latest && node ./scripts/generateTypes.cjs && tsx ./scripts/generateModels.ts"
+    "migrate": "knex migrate:latest && npm run post:migrate",
+    "migrate:down": "knex migrate:down && npm run post:migrate",
+    "post:migrate": "node ./scripts/generateTypes.cjs && tsx ./scripts/generateModels.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1119.0",
+    "@aws-sdk/s3-request-presigner": "^3.1119.0",
     "@fluentui/react-components": "^9.74.5",
     "@fluentui/react-icons": "^2.0.334",
     "@neondatabase/auth": "^0.4.2-beta",
     "@tabler/icons-react": "^3.46.0",
     "@tailwindcss/postcss": "^4.3.3",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-deep-link": "^2.4.9",
+    "@tauri-apps/plugin-dialog": "^2.2.0",
+    "@tauri-apps/plugin-fs": "^2.2.0",
+    "@tauri-apps/plugin-opener": "^2.2.7",
+    "@tauri-apps/plugin-shell": "^2.3.5",
     "@vercel/analytics": "^2.0.1",
     "dotenv": "^17.4.2",
     "jose": "^6.2.8",
@@ -26,7 +36,9 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tailwindcss": "^4.3.3",
-    "zod": "^4.4.3"
+    "tauri-plugin-keyring-api": "^0.1.1",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@types/node": "^20",

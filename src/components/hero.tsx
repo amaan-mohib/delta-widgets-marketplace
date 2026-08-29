@@ -17,7 +17,8 @@ import {
   TagRegular,
 } from "@fluentui/react-icons";
 import { useRouter } from "next/navigation";
-// import { useEffect } from "react";
+import { useEffect } from "react";
+import { isTauri } from "@tauri-apps/api/core";
 
 interface HeroProps {
   tab: "discover" | "categories" | "tags";
@@ -36,6 +37,10 @@ const Hero: React.FC<HeroProps> = ({ tab }) => {
   //     // setLoading(false);
   //   });
   // }, []);
+
+  useEffect(() => {
+    console.log({ isTauri: isTauri() });
+  }, []);
 
   return (
     <section>
