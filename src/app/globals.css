@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "../styles/_variables.scss";
+@import "../styles/_keyframe-animations.scss";
 
 :root {
   /* Updated color tokens to use the specified color palette */
@@ -35,6 +37,8 @@
   --sidebar-accent-foreground: #0d0d0d;
   --sidebar-border: #69afbf;
   --sidebar-ring: #69afbf;
+
+  --header-height: 60px;
 }
 
 /* Updated to use proper dark theme implementation */
@@ -122,9 +126,18 @@ html.dark {
   }
 }
 
+.h-app-screen {
+  height: calc(100vh - var(--header-height));
+}
+
 main,
 .main {
-  min-height: calc(100vh - (64.8px * 2));
+  min-height: calc(100vh - var(--header-height));
+}
+
+.upload-form {
+  --body-height: calc(100vh - var(--header-height) * 2);
+  --widget-list-sidebar: 200px;
 }
 
 .md-body {
