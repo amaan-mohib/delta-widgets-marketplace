@@ -5,6 +5,7 @@ import { useAuth } from "@/store/useAuth";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { getUserProfile } from "../actions";
+import { Header } from "@/components/header";
 
 const DashboardLayout = ({ children }: LayoutProps<"/dashboard">) => {
   const { loading } = useAuth();
@@ -33,7 +34,11 @@ const DashboardLayout = ({ children }: LayoutProps<"/dashboard">) => {
   }, []);
 
   if (loading) {
-    return <main>Loading</main>;
+    return (
+      <>
+        <Header isDashboard /> <main>Loading</main>
+      </>
+    );
   }
 
   return children;

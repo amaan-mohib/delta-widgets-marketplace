@@ -1,6 +1,7 @@
-"use cache";
+"use client";
 
 import { APP_NAME } from "@/lib/constants";
+import { tokens } from "@fluentui/react-components";
 import {
   IconBrandDiscord,
   IconBrandGithub,
@@ -9,7 +10,9 @@ import {
 
 export async function Footer() {
   return (
-    <footer className="bg-card border-t">
+    <footer
+      style={{ background: tokens.colorNeutralBackground2 }}
+      className="border-t">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <div className="col-span-1 md:col-span-2">

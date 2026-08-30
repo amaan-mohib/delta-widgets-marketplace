@@ -38,10 +38,6 @@ const Hero: React.FC<HeroProps> = ({ tab }) => {
   //   });
   // }, []);
 
-  useEffect(() => {
-    console.log({ isTauri: isTauri() });
-  }, []);
-
   return (
     <section>
       <div className="flex flex-col gap-2 pt-8 pb-5">

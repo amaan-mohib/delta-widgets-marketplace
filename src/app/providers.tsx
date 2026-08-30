@@ -10,6 +10,8 @@ import {
 } from "@fluentui/react-components";
 import { useServerInsertedHTML } from "next/navigation";
 import { darkTheme } from "@/lib/themes";
+import { useDataStore } from "@/store/useDataStore";
+import { isTauri } from "@tauri-apps/api/core";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [renderer] = React.useState(() => createDOMRenderer());
@@ -22,6 +24,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     didRenderRef.current = true;
     return <>{renderToStyleElements(renderer)}</>;
   });
+
+  React.useEffect(() => {
+    useDataStore.setState({
+      isInApp: isTauri(),
+    });
+  }, []);
 
   return (
     <RendererProvider renderer={renderer}>

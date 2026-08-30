@@ -1,26 +1,52 @@
 "use client";
 
 import { APP_NAME, DEEP_LINK_BASE_URL } from "@/lib/constants";
-import { Button } from "@fluentui/react-components";
-import { isTauri } from "@tauri-apps/api/core";
-import { useMemo } from "react";
+import { Body2, Button, Link } from "@fluentui/react-components";
+import UploadList from "./UploadList";
+import { useDataStore } from "@/store/useDataStore";
+import { Header } from "@/components/header";
+import UploadFooter from "./UploadFooter";
+import { useEffect } from "react";
+import UploadForm from "./UploadForm";
 
 interface UploadPageProps {}
 
 const UploadPage: React.FC<UploadPageProps> = () => {
-  const isInApp = useMemo(() => {
-    return isTauri();
+  const { isInApp, uploadStep } = useDataStore();
+
+  useEffect(() => {
+    useDataStore.setState({ uploadStep: "select" });
   }, []);
 
-  return (
-    <main>
-      {!isInApp && (
-        <div className="flex h-full items-center justify-center main">
-          <Button as="a" href={DEEP_LINK_BASE_URL + "upload"}>
+  if (!isInApp) {
+    return (
+      <main>
+        <div className="flex flex-col main items-center justify-center gap-3">
+          <Body2 className="mb-5">Open {APP_NAME} to upload widgets</Body2>
+          <Button
+            appearance="primary"
+            as="a"
+            href={DEEP_LINK_BASE_URL + "upload"}>
             Open {APP_NAME}
           </Button>
+          <Link href="https://deltawidgets.com/download">Download</Link>
         </div>
-      )}
+      </main>
+    );
+  }
+
+  return (
+    <main className="relative upload-form">
+      <div className="sticky top-0 w-full z-10">
+        <Header isDashboard />
+      </div>
+      <div style={{ minHeight: "var(--body-height)" }}>
+        {uploadStep === "select" && <UploadList />}
+        {uploadStep === "form" && <UploadForm />}
+      </div>
+      <div className="sticky bottom-0 w-full z-10">
+        <UploadFooter />
+      </div>
     </main>
   );
 };

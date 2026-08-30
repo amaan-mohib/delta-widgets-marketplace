@@ -8,6 +8,7 @@ interface IUser {
   email: string;
   emailVerified: boolean;
   name: string;
+  image?: string | null;
 }
 
 interface IAuth {
