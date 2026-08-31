@@ -8,7 +8,7 @@ import {
   IconExternalLink,
 } from "@tabler/icons-react";
 
-export async function Footer() {
+export function Footer() {
   return (
     <footer
       style={{ background: tokens.colorNeutralBackground2 }}

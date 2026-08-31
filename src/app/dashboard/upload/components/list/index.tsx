@@ -6,21 +6,28 @@ import { templateWidgets } from "@/lib/constants";
 import { useDataStore } from "@/store/useDataStore";
 import {
   Body1Strong,
-  Body2,
-  Button,
   Card,
   CardHeader,
   CardPreview,
   Checkbox,
-  tokens,
 } from "@fluentui/react-components";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface UploadListProps {}
 
 const UploadList: React.FC<UploadListProps> = () => {
   const [widgets, setWidgets] = useState<IGetAllWidget[]>([]);
-  const [selectedWidgets, setSelectedWidgets] = useState<string[]>([]);
+  const widgetUploads = useDataStore((s) => s.widgetUploads);
+  const selectedWidgets = useDataStore((s) => s.selectedWidgets);
+
+  const uploadStartedFor = useMemo(
+    () => Object.keys(widgetUploads),
+    [widgetUploads],
+  );
+  const selectedWidgetKeys = useMemo(
+    () => selectedWidgets.map((i) => i.manifest.key),
+    [selectedWidgets],
+  );
 
   useEffect(() => {
     commands.getAllWidgets({ dir: "widgets" }).then((widgets) => {
@@ -31,13 +38,17 @@ const UploadList: React.FC<UploadListProps> = () => {
     });
   }, []);
 
-  useEffect(() => {
-    useDataStore.setState({
-      selectedWidgets: widgets.filter((item) =>
-        selectedWidgets.includes(item.manifest.key),
-      ),
-    });
-  }, [selectedWidgets]);
+  const onSelect = (widget: IGetAllWidget, checked: boolean) => {
+    if (checked) {
+      useDataStore.setState({ selectedWidgets: [...selectedWidgets, widget] });
+    } else {
+      useDataStore.setState({
+        selectedWidgets: selectedWidgets.filter(
+          (p) => p.manifest.key !== widget.manifest.key,
+        ),
+      });
+    }
+  };
 
   return (
     <section>
@@ -48,36 +59,23 @@ const UploadList: React.FC<UploadListProps> = () => {
         }}>
         {widgets.map((widget) => (
           <Card
-            selected={selectedWidgets.includes(widget.manifest.key)}
+            key={widget.manifest.key}
+            disabled={uploadStartedFor.includes(widget.manifest.key)}
+            selected={selectedWidgetKeys.includes(widget.manifest.key)}
             onSelectionChange={(_, { selected }) => {
-              if (selected) {
-                setSelectedWidgets((prev) => [...prev, widget.manifest.key]);
-              } else {
-                setSelectedWidgets((prev) =>
-                  prev.filter((p) => p !== widget.manifest.key),
-                );
-              }
+              onSelect(widget, selected);
             }}
             floatingAction={
               <Checkbox
+                disabled={uploadStartedFor.includes(widget.manifest.key)}
                 aria-labelledby={`${widget.manifest.key}-id`}
                 onChange={(_, { checked }) => {
-                  if (checked) {
-                    setSelectedWidgets((prev) => [
-                      ...prev,
-                      widget.manifest.key,
-                    ]);
-                  } else {
-                    setSelectedWidgets((prev) =>
-                      prev.filter((p) => p !== widget.manifest.key),
-                    );
-                  }
+                  onSelect(widget, !!checked);
                 }}
-                checked={selectedWidgets.includes(widget.manifest.key)}
+                checked={selectedWidgetKeys.includes(widget.manifest.key)}
               />
             }
             appearance="filled-alternative"
-            key={widget.manifest.key}
             className="min-h-42.5">
             <CardHeader
               header={
@@ -86,9 +84,9 @@ const UploadList: React.FC<UploadListProps> = () => {
                 </Body1Strong>
               }
             />
-            <CardPreview>
+            <CardPreview className="h-full">
               <WidgetPreview
-                widget={{ ...widget.manifest, path: widget.path }}
+                widget={{ ...widget.manifest, path: widget.manifestPath }}
               />
             </CardPreview>
           </Card>

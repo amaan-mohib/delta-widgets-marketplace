@@ -6,14 +6,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { getUserProfile } from "../actions";
 import { Header } from "@/components/header";
+import { Spinner } from "@fluentui/react-components";
 
 const DashboardLayout = ({ children }: LayoutProps<"/dashboard">) => {
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    authClient.getSession().then(async ({ data }) => {
+  const getUser = async () => {
+    try {
+      useAuth.setState({ loading: true });
+      const { data } = await authClient.getSession();
       const user = data?.user;
       if (!user) {
         router.replace("/login?redirect=" + pathname);
@@ -24,21 +27,36 @@ const DashboardLayout = ({ children }: LayoutProps<"/dashboard">) => {
       useAuth.setState({
         user,
         loading: false,
-        profile,
+        profile: profile || null,
       });
 
       if (!profile) {
         router.replace("/dashboard/welcome?redirect=" + pathname);
       }
-    });
+    } catch (error) {
+      console.error(error);
+      useAuth.setState({ loading: false, user: null, profile: null });
+      router.replace("/login?redirect=" + pathname);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
   }, []);
 
   if (loading) {
     return (
       <>
-        <Header isDashboard /> <main>Loading</main>
+        <Header isDashboard />
+        <main className="flex items-center justify-center">
+          <Spinner />
+        </main>
       </>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return children;

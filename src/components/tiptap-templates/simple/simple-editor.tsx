@@ -206,8 +206,9 @@ const MobileToolbarContent = ({
 interface IEditor {
   content?: string;
   setContent?: (value: string) => void;
+  disabled?: boolean;
 }
-export function SimpleEditor({ content, setContent }: IEditor) {
+export function SimpleEditor({ content, setContent, disabled }: IEditor) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
@@ -265,6 +266,10 @@ export function SimpleEditor({ content, setContent }: IEditor) {
     ],
     content,
   });
+
+  useEffect(() => {
+    editor?.setEditable(!disabled);
+  }, [editor, disabled]);
 
   const rect = useCursorVisibility({
     editor,

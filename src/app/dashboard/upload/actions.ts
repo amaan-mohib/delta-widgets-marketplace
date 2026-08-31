@@ -6,18 +6,9 @@ import { S3 } from "@/lib/storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getAuthUser } from "@/app/actions";
+import { IUploadManifest } from "@/lib/types/manifest";
 
-interface IManifest {
-  key: string;
-  label: string;
-  widget_type: "HTML" | "JSON" | "URL";
-  description?: string;
-  versionLabel?: string;
-  changelog?: string;
-  screenshots?: { fileName: string; path: string }[];
-}
-
-export const startUpload = async (manifest: IManifest) => {
+export const startUpload = async (manifest: IUploadManifest) => {
   const user = await getAuthUser();
   if (!user) {
     throw new Error("Unauthorized");

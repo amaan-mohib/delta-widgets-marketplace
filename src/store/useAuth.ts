@@ -13,11 +13,12 @@ interface IUser {
 
 interface IAuth {
   user: IUser | null;
-  profile?: Pick<UserProfiles, "username" | "created_at">;
+  profile: Pick<UserProfiles, "username" | "created_at"> | null;
   loading: boolean;
 }
 
 export const useAuth = create<IAuth>(() => ({
   user: null,
   loading: true,
+  profile: null,
 }));

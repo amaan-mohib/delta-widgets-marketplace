@@ -81,7 +81,7 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({ widget, isDraft }) => {
   const styles = useStyles();
 
   useEffect(() => {
-    if (widgetType !== "json") return;
+    if (widgetType === "url") return;
 
     if (key in templateWidgets) {
       setThumbPath(templateWidgets[key]);
@@ -131,7 +131,7 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({ widget, isDraft }) => {
     );
   }
 
-  if (widgetType === "html") {
+  if (widgetType === "html" && !thumbPath) {
     return (
       <div className={styles.container}>
         <div className={styles.url}>

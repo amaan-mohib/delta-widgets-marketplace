@@ -4,7 +4,7 @@ import {
   checkUsernameAvailability,
   createUsername,
 } from "@/app/dashboard/welcome/actions";
-import { useDebounce } from "@/lib/utils";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useAuth } from "@/store/useAuth";
 import {
   Button,

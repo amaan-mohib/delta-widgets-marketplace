@@ -2,12 +2,13 @@
 
 import { APP_NAME, DEEP_LINK_BASE_URL } from "@/lib/constants";
 import { Body2, Button, Link } from "@fluentui/react-components";
-import UploadList from "./UploadList";
+import UploadList from "./list";
 import { useDataStore } from "@/store/useDataStore";
 import { Header } from "@/components/header";
-import UploadFooter from "./UploadFooter";
+import UploadFooter from "./list/list-footer";
 import { useEffect } from "react";
-import UploadForm from "./UploadForm";
+import UploadForm from "./form";
+import UploadFormFooter from "./form/form-footer";
 
 interface UploadPageProps {}
 
@@ -37,15 +38,16 @@ const UploadPage: React.FC<UploadPageProps> = () => {
 
   return (
     <main className="relative upload-form">
-      <div className="sticky top-0 w-full z-10">
+      <div className="sticky top-0 w-full z-99">
         <Header isDashboard />
       </div>
       <div style={{ minHeight: "var(--body-height)" }}>
         {uploadStep === "select" && <UploadList />}
         {uploadStep === "form" && <UploadForm />}
       </div>
-      <div className="sticky bottom-0 w-full z-10">
-        <UploadFooter />
+      <div className="sticky bottom-0 w-full z-99">
+        {uploadStep === "select" && <UploadFooter />}
+        {uploadStep === "form" && <UploadFormFooter />}
       </div>
     </main>
   );

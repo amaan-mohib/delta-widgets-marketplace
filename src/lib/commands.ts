@@ -9,8 +9,10 @@ export interface IMediaActionCmd {
 }
 
 export interface IGetAllWidget {
-  manifest: ILiteWidget;
+  manifest: Omit<ILiteWidget, "path">;
   path: string;
+  manifestPath: string;
+  thumbPath: string;
   modifiedAt: number;
   isDraft: boolean;
 }

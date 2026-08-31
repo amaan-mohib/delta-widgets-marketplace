@@ -57,3 +57,17 @@ export type ILiteWidget = Omit<
   | "customAssets"
   | "theme"
 >;
+
+export interface IUploadManifest {
+  key: string;
+  label: string;
+  widget_type: "HTML" | "JSON" | "URL";
+  description?: string;
+  versionLabel?: string;
+  changelog?: string;
+  screenshots?: {
+    fileName: string;
+    path: string;
+    fileSize?: number;
+  }[];
+}
