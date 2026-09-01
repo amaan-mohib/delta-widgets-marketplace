@@ -7,8 +7,15 @@ import {
   IconBrandGithub,
   IconExternalLink,
 } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 
 export function Footer() {
+  const [year, setYear] = useState(2026);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer
       style={{ background: tokens.colorNeutralBackground2 }}
@@ -133,8 +140,7 @@ export function Footer() {
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} {APP_NAME}. Open source under GPL-3.0
-            License.
+            © {year} {APP_NAME}. Open source under GPL-3.0 License.
           </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
             <a

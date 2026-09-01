@@ -39,7 +39,7 @@ const UploadPage: React.FC<UploadPageProps> = () => {
   return (
     <main className="relative upload-form">
       <div className="sticky top-0 w-full z-99">
-        <Header isDashboard />
+        <Header isDashboard isUpload />
       </div>
       <div style={{ minHeight: "var(--body-height)" }}>
         {uploadStep === "select" && <UploadList />}

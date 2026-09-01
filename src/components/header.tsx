@@ -20,48 +20,55 @@ import Image from "next/image";
 
 interface HeaderProps {
   isDashboard?: boolean;
+  isUpload?: boolean;
 }
 
-export function Header({ isDashboard }: HeaderProps) {
+export function Header({ isDashboard, isUpload }: HeaderProps) {
   const { user } = useAuth();
   const isInApp = useDataStore((state) => state.isInApp);
 
   const headerAction = useMemo(() => {
-    if (user) {
-      return (
-        <Menu positioning="below-end">
-          <MenuTrigger disableButtonEnhancement>
-            <Avatar
-              name={user.name}
-              color="brand"
-              image={user.image ? { src: user.image } : {}}
-            />
-          </MenuTrigger>
-          <MenuPopover>
-            <MenuList>
-              <MenuItemLink href="/dashboard">Dashboard</MenuItemLink>
-              <MenuItemLink href="/logout">Log out</MenuItemLink>
-            </MenuList>
-          </MenuPopover>
-        </Menu>
-      );
-    }
-    if (isInApp) {
-      return (
-        <Button
-          key="upload"
-          as="a"
-          appearance="primary"
-          href="/dashboard/upload"
-          icon={<IconUpload />}>
-          Upload
-        </Button>
-      );
-    }
     return (
-      <Button key="get-app" as="a" href="https://deltawidgets.com/download">
-        Get {APP_NAME}
-      </Button>
+      <>
+        {isInApp ? (
+          !isUpload && (
+            <Button
+              key="upload"
+              as="a"
+              appearance="primary"
+              href="/dashboard/upload"
+              icon={<IconUpload />}>
+              Upload
+            </Button>
+          )
+        ) : (
+          <Button key="get-app" as="a" href="https://deltawidgets.com/download">
+            Get {APP_NAME}
+          </Button>
+        )}
+        {user && (
+          <>
+            <Button as="a" appearance="subtle" href="/dashboard">
+              Dashboard
+            </Button>
+            <Menu positioning="below-end">
+              <MenuTrigger disableButtonEnhancement>
+                <Avatar
+                  name={user.name}
+                  color="brand"
+                  image={user.image ? { src: user.image } : {}}
+                />
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuList>
+                  <MenuItemLink href="/profile">Profile</MenuItemLink>
+                  <MenuItemLink href="/logout">Log out</MenuItemLink>
+                </MenuList>
+              </MenuPopover>
+            </Menu>
+          </>
+        )}
+      </>
     );
   }, [isInApp, user]);
 

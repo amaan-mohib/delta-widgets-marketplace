@@ -1,7 +1,7 @@
 import { UserProfiles } from "@/lib/db";
 import { create } from "zustand";
 
-interface IUser {
+export interface IUser {
   id: string;
   createdAt: Date;
   updatedAt: Date;

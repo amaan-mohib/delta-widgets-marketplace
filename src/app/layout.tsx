@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Providers } from "./providers";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { ThemeProvider } from "../providers/theme-provider";
 import { APP_NAME, WEBSITE_URL } from "@/lib/constants";
 import { Analytics } from "@vercel/analytics/next";
+import AuthProvider from "@/providers/auth-provider";
+import AppProvider from "@/providers/app-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -87,7 +87,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`dark ${inter.variable}`}>
       <body>
-        <Providers>{children}</Providers>
+        <AuthProvider />
+        <AppProvider />
+        <ThemeProvider>{children}</ThemeProvider>
         <Analytics />
       </body>
     </html>
