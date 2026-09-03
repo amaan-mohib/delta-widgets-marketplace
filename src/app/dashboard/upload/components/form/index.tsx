@@ -27,7 +27,7 @@ const UploadForm: React.FC<UploadFormProps> = () => {
       ? (s.widgetUploads[s.selectedWidgetKey]?.state ?? null)
       : null,
   );
-  const disabled = state !== "DRAFT";
+  const disabled = state === "UPLOADED" || state === "UPLOADING";
 
   const onChange = useCallback(
     ({ name, value }: IOnChange) => {

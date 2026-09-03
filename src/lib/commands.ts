@@ -61,6 +61,28 @@ export type IQueryMediaHistory = any;
 export type IUploadHtmlWidgetParams = { manifestPath: string };
 export type IUploadHtmlWidget = void;
 
+export type ICaptureWidgetScreenshotParams = {
+  label: string;
+  manifestPath: string;
+  refresh?: boolean;
+};
+export type ICaptureWidgetScreenshot = void;
+
+export type IUploadWidgetParams = {
+  uploadJobs: { url: string; name: string; path?: string }[];
+  manifestPath: string;
+  uploadValues: {
+    key: string;
+    label: string;
+    version: string;
+    description?: string;
+  };
+};
+export type IUploadWidget = void;
+
+export type IValidateWidgetAssetParams = { assetPath: string };
+export type IValidateWidgetAsset = void;
+
 export const commands = {
   getMedia: () => invoke<IMedia[]>("get_media"),
   startMediaListenerCmd: () => invoke<void>("start_media_listener_cmd"),
@@ -130,6 +152,10 @@ export const commands = {
     invoke<IGetMediaMetadata>("get_media_metadata", params),
   deleteChat: (params: { id: string }) => invoke<void>("delete_chat", params),
   createGalleryWindow: () => invoke<void>("create_gallery_window"),
-  uploadHtmlWidget: (params?: IUploadHtmlWidgetParams) =>
-    invoke<IUploadHtmlWidget>("upload_html_widget", params),
+  captureWidgetScreenshot: (params?: ICaptureWidgetScreenshotParams) =>
+    invoke<ICaptureWidgetScreenshot>("capture_widget_screenshot", params),
+  uploadWidget: (params: IUploadWidgetParams) =>
+    invoke<IUploadWidget>("upload_widget", params),
+  validateWidgetAsset: (params: IValidateWidgetAssetParams) =>
+    invoke<IValidateWidgetAsset>("validate_widget_asset", params),
 };

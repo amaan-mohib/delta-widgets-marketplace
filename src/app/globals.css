@@ -43,6 +43,7 @@
 
 /* Updated to use proper dark theme implementation */
 html.dark {
+  color-scheme: dark;
   /* Dark mode tokens using the specified dark color palette */
   --background: #0d0d0d;
   --foreground: #ccd9d9;

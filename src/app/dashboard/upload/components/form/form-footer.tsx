@@ -2,25 +2,35 @@
 
 import { useDataStore } from "@/store/useDataStore";
 import { Button, Spinner, tokens } from "@fluentui/react-components";
-import { CheckmarkRegular } from "@fluentui/react-icons";
-import React, { useMemo, useState } from "react";
+import { CheckmarkRegular, WarningRegular } from "@fluentui/react-icons";
+import React, { useEffect, useMemo } from "react";
+import { finalizeUpload, startUpload } from "../../actions";
+import { message } from "@tauri-apps/plugin-dialog";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { commands } from "@/lib/commands";
+import { validateForm } from "./utils";
+import { useRouter } from "next/navigation";
 
 interface UploadFormFooterProps {}
 
 const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
-  const [loading, setLoading] = useState(false);
   const selectedWidgets = useDataStore((state) => state.selectedWidgets);
   const widgetUploads = useDataStore((state) => state.widgetUploads);
   const selectedWidgetKey = useDataStore((state) => state.selectedWidgetKey);
+  const router = useRouter();
 
-  const { uploaded, uploading, notUploaded } = useMemo(() => {
+  const { uploaded, notUploaded, warnings } = useMemo(() => {
     const uploaded: string[] = [],
       uploading: string[] = [],
-      notUploaded: string[] = [];
+      notUploaded: string[] = [],
+      warnings: string[] = [];
     Object.entries(widgetUploads).forEach(([key, { state }]) => {
       switch (state) {
         case "DRAFT":
           notUploaded.push(key);
+          break;
+        case "WARNING":
+          warnings.push(key);
           break;
         case "UPLOADING":
           uploading.push(key);
@@ -32,31 +42,102 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
           break;
       }
     });
-    return { uploaded, uploading, notUploaded };
+    return { uploaded, uploading, warnings, notUploaded };
   }, [widgetUploads]);
 
+  useEffect(() => {
+    if (uploaded.length === selectedWidgets.length) {
+      router.push("/dashboard/uploads");
+    }
+  }, [uploaded, selectedWidgets]);
+
   const onSubmit = async () => {
-    // try {
-    //   if (selectedWidgets.length === 0) return;
-    //   setLoading(true);
-    //   await useDataStore.getState().initializeWidgetUpload(selectedWidgets);
-    //   setLoading(false);
-    //   useDataStore.setState({
-    //     uploadStep: "form",
-    //     selectedWidgetKey: selectedWidgets[0].manifest.key,
-    //   });
-    // } catch (error) {
-    //   setLoading(false);
-    // }
+    if (!selectedWidgetKey) return;
+
+    const { values, state, manifest, versions } =
+      widgetUploads[selectedWidgetKey];
+
+    if (state === "UPLOADED" || state === "UPLOADING") return;
+
+    const { setWidgetUploadErrors, setWidgetUploadState } =
+      useDataStore.getState();
+
+    setWidgetUploadState(selectedWidgetKey, "UPLOADING");
+
+    const errors = await validateForm(
+      values,
+      versions.length > 0,
+      manifest.file,
+    );
+    setWidgetUploadErrors(selectedWidgetKey, errors);
+    console.log(errors);
+
+    if (errors.length > 0) {
+      return;
+    }
+
+    await getCurrentWebviewWindow().setClosable(false).catch(console.error);
+
+    try {
+      setWidgetUploadState(selectedWidgetKey, "UPLOADING");
+
+      const { uploadJobId, uploadJobs, widgetVersion, widgetKey } =
+        await startUpload(values, {
+          path: manifest.path,
+          customAssets: manifest.customAssets,
+          file: manifest.file,
+          widgetType: manifest.widgetType,
+        });
+      await commands.uploadWidget({
+        manifestPath: manifest.path,
+        uploadJobs,
+        uploadValues: {
+          key: widgetKey,
+          label: values.label,
+          version: widgetVersion.version,
+          description: values.description,
+        },
+      });
+      await finalizeUpload(uploadJobId);
+
+      setWidgetUploadState(selectedWidgetKey, "UPLOADED");
+
+      const next = [...notUploaded, ...warnings].filter(
+        (k) => k !== selectedWidgetKey,
+      );
+      if (next.length !== 0) {
+        useDataStore.setState({ selectedWidgetKey: next[0] });
+      }
+    } catch (error) {
+      console.error(error);
+      const errorMessage = `Something went wrong while uploading widget: "${manifest.label}"`;
+      message(errorMessage, { title: "Error", kind: "error" }).catch(
+        console.error,
+      );
+      setWidgetUploadErrors(selectedWidgetKey, [
+        { key: "global", message: errorMessage },
+      ]);
+    }
+
+    await getCurrentWebviewWindow().setClosable(true).catch(console.error);
   };
 
   const nextIcon = useMemo(() => {
-    if (loading || uploading.includes(selectedWidgetKey!))
+    if (!selectedWidgetKey || !widgetUploads[selectedWidgetKey]) {
+      return { icon: null, disabled: false };
+    }
+    const status = widgetUploads[selectedWidgetKey].state;
+    if (status === "UPLOADING") {
       return { icon: <Spinner size="tiny" />, disabled: true };
-    if (uploaded.includes(selectedWidgetKey!))
+    }
+    if (status === "UPLOADED") {
       return { icon: <CheckmarkRegular />, disabled: true };
+    }
+    if (status === "WARNING") {
+      return { icon: <WarningRegular />, disabled: false };
+    }
     return { icon: null, disabled: false };
-  }, [selectedWidgetKey, loading, uploaded, uploading]);
+  }, [selectedWidgetKey, widgetUploads]);
 
   if (!selectedWidgetKey) return null;
 

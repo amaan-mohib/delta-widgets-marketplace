@@ -1,13 +1,11 @@
+"use client";
+
 import { IGetAllWidget } from "@/lib/commands";
 import { IUploadManifest } from "@/lib/types/manifest";
 import { cloneObject } from "@/lib/utils";
-import { exists, lstat } from "@tauri-apps/plugin-fs";
 import { create } from "zustand";
-
-interface IUploadState {
-  state: "DRAFT" | "UPLOADING" | "UPLOADED";
-  values: IUploadManifest;
-}
+import { initializeWidget, IUploadState } from "./store-actions";
+import { IFormError } from "@/app/dashboard/upload/components/form/utils";
 
 interface IDataStore {
   isInApp: boolean;
@@ -21,6 +19,7 @@ interface IDataStore {
     key: string,
     values: Partial<IUploadManifest>,
   ) => void;
+  setWidgetUploadErrors: (key: string, errors: IFormError[]) => void;
 }
 
 export const useDataStore = create<IDataStore>((set, get) => ({
@@ -37,33 +36,8 @@ export const useDataStore = create<IDataStore>((set, get) => ({
         continue;
       }
       hasChange = true;
-      const thumbExists = await exists(widget.thumbPath);
-      const screenshots: IUploadManifest["screenshots"] = [];
-      if (thumbExists) {
-        const info = await lstat(widget.thumbPath);
-        screenshots.push({
-          fileName: "thumb.png",
-          path: widget.thumbPath,
-          fileSize: info.size,
-        });
-      }
-      const widgetType = widget.manifest.widgetType;
-      const values: IUploadManifest = {
-        key: widget.manifest.key,
-        label: widget.manifest.label,
-        widget_type:
-          widgetType === "html"
-            ? "HTML"
-            : widgetType === "json"
-              ? "JSON"
-              : "URL",
-        description: widget.manifest.description,
-        screenshots,
-      };
-      uploads[widget.manifest.key] = {
-        state: "DRAFT",
-        values,
-      };
+      const uploadValue = await initializeWidget(widget);
+      uploads[widget.manifest.key] = uploadValue;
     }
     if (hasChange) {
       set({
@@ -88,6 +62,17 @@ export const useDataStore = create<IDataStore>((set, get) => ({
       ...prev[key].values,
       ...values,
     };
+    set({ widgetUploads: cloneObject(prev) });
+  },
+  setWidgetUploadErrors(key, errors) {
+    const prev = get().widgetUploads;
+    if (!prev[key]) {
+      throw new Error("Widget not defined: " + key);
+    }
+    if (errors.length !== 0) {
+      prev[key].state = "WARNING";
+    }
+    prev[key].errors = errors;
     set({ widgetUploads: cloneObject(prev) });
   },
 }));

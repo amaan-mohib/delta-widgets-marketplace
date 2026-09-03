@@ -16,6 +16,8 @@ if (!(
   throw new Error("Storage credentials undefined");
 }
 
+export const S3_BUCKET = CF_R2_BUCKET;
+
 export const S3 = new S3Client({
   region: "auto", // Required by SDK but not used by R2
   // Provide your Cloudflare account ID

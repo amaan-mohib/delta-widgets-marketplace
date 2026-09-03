@@ -1,3 +1,6 @@
+import { readTextFile } from "@tauri-apps/plugin-fs";
+import { IWidget } from "./types/manifest";
+
 export const cloneObject = <T>(obj: T) => {
   return JSON.parse(JSON.stringify(obj)) as T;
 };
@@ -35,3 +38,8 @@ export function humanStorageSize(bytes: number, si = false, dp = 1) {
 
   return bytes.toFixed(dp) + " " + units[u];
 }
+
+export const getManifestFromPath = async (manifestPath: string) => {
+  const manifest = await readTextFile(manifestPath);
+  return JSON.parse(manifest) as Omit<IWidget, "path">;
+};

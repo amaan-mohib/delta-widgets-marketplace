@@ -10,20 +10,18 @@ import {
   CardHeader,
   CardPreview,
   Checkbox,
+  Text,
+  tokens,
 } from "@fluentui/react-components";
+import { AppsAddInRegular } from "@fluentui/react-icons";
 import { useEffect, useMemo, useState } from "react";
 
 interface UploadListProps {}
 
 const UploadList: React.FC<UploadListProps> = () => {
   const [widgets, setWidgets] = useState<IGetAllWidget[]>([]);
-  const widgetUploads = useDataStore((s) => s.widgetUploads);
   const selectedWidgets = useDataStore((s) => s.selectedWidgets);
 
-  const uploadStartedFor = useMemo(
-    () => Object.keys(widgetUploads),
-    [widgetUploads],
-  );
   const selectedWidgetKeys = useMemo(
     () => selectedWidgets.map((i) => i.manifest.key),
     [selectedWidgets],
@@ -60,14 +58,12 @@ const UploadList: React.FC<UploadListProps> = () => {
         {widgets.map((widget) => (
           <Card
             key={widget.manifest.key}
-            disabled={uploadStartedFor.includes(widget.manifest.key)}
             selected={selectedWidgetKeys.includes(widget.manifest.key)}
             onSelectionChange={(_, { selected }) => {
               onSelect(widget, selected);
             }}
             floatingAction={
               <Checkbox
-                disabled={uploadStartedFor.includes(widget.manifest.key)}
                 aria-labelledby={`${widget.manifest.key}-id`}
                 onChange={(_, { checked }) => {
                   onSelect(widget, !!checked);
@@ -91,6 +87,30 @@ const UploadList: React.FC<UploadListProps> = () => {
             </CardPreview>
           </Card>
         ))}
+        <Card
+          appearance="filled-alternative"
+          className="min-h-42.5"
+          onClick={() => {}}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              gap: "3px",
+              minHeight: 150,
+            }}>
+            <AppsAddInRegular fontSize="32px" />
+            <Text weight="semibold">Create new widget</Text>
+            <Text
+              align="center"
+              size={200}
+              style={{ marginTop: 5, color: tokens.colorNeutralForeground2 }}>
+              Build a custom widget for your desktop
+            </Text>
+          </div>
+        </Card>
       </div>
     </section>
   );
