@@ -1,6 +1,6 @@
 "use client";
 
-import WidgetPreview from "@/components/WidgetPreview";
+import WidgetPreview from "@/components/widget-preview";
 import { IGetAllWidget } from "@/lib/commands";
 import { useDataStore } from "@/store/useDataStore";
 import {

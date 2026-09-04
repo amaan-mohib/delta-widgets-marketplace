@@ -5,8 +5,7 @@ import { IFormError } from "@/app/dashboard/upload/components/form/utils";
 import { IGetAllWidget } from "@/lib/commands";
 import { WidgetVersions } from "@/lib/db";
 import { IUploadManifest, IWidget } from "@/lib/types/manifest";
-import { getManifestFromPath } from "@/lib/utils";
-import { path } from "@tauri-apps/api";
+import { getManifestFromPath, getUrlThumbnailPath } from "@/lib/utils";
 import { exists, lstat } from "@tauri-apps/plugin-fs";
 
 export interface IUploadState {
@@ -21,13 +20,9 @@ export interface IUploadState {
 }
 
 const getUrlThumbnail = async (url: string) => {
-  const urlObj = new URL(url);
-  const fileName = Buffer.from(urlObj.hostname).toString("base64") + ".png";
-  const thumbPath = await path.resolve(
-    await path.appCacheDir(),
-    "thumbs",
-    fileName,
-  );
+  const thumbPath = await getUrlThumbnailPath(url);
+  if (!thumbPath) return [];
+
   const thumbExists = await exists(thumbPath);
   const screenshots: IUploadManifest["screenshots"] = [];
   if (thumbExists) {

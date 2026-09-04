@@ -3,6 +3,7 @@
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import { IWidget } from "./types/manifest";
 import { commands } from "./commands";
+import { path } from "@tauri-apps/api";
 
 export const cloneObject = <T>(obj: T) => {
   return JSON.parse(JSON.stringify(obj)) as T;
@@ -64,3 +65,20 @@ export const setTimeoutAsync = (timeout: number) =>
       resolve();
     }, timeout);
   });
+
+export const getUrlThumbnailPath = async (url: string) => {
+  try {
+    const urlObj = new URL(url);
+    const fileName = Buffer.from(urlObj.hostname).toString("base64") + ".png";
+    const thumbPath = await path.resolve(
+      await path.appCacheDir(),
+      "thumbs",
+      fileName,
+    );
+
+    return thumbPath;
+  } catch (error) {
+    console.error("Error creating URL thumbnail:", error);
+    return null;
+  }
+};

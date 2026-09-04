@@ -12,6 +12,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { nanoid } from "nanoid";
 import { ILiteWidget } from "@/lib/types/manifest";
 import { templateWidgets } from "@/lib/constants";
+import { getUrlThumbnailPath } from "@/lib/utils";
 
 interface WidgetPreviewProps {
   widget: ILiteWidget;
@@ -60,15 +61,12 @@ const checkThumbnailExists = async (manifestPath: string) => {
 
 const createUrlThumbnail = async (url: string) => {
   try {
-    const urlObj = new URL(url);
-    const fileName = Buffer.from(urlObj.hostname).toString("base64") + ".png";
-    const thumbPath = await path.resolve(
-      await path.appCacheDir(),
-      "thumbs",
-      fileName,
-    );
-
-    return convertFileSrc(thumbPath);
+    const thumbPath = await getUrlThumbnailPath(url);
+    if (thumbPath) {
+      return convertFileSrc(thumbPath);
+    } else {
+      return null;
+    }
   } catch (error) {
     console.error("Error creating URL thumbnail:", error);
     return null;
