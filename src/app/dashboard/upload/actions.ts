@@ -8,7 +8,7 @@ import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getAuthUser } from "@/app/actions";
 import { IUploadManifest, IWidget } from "@/lib/types/manifest";
 import { Knex } from "knex";
-import { IUser } from "@/store/useAuth";
+import { IUser } from "@/lib/types/auth";
 
 interface IUploadJob {
   fileName: string;
@@ -295,7 +295,7 @@ export const finalizeUpload = async (jobId: number) => {
       )
       .returning("id")
       .transacting(trx);
-
+    // TODO: add sort order
     const widgetVersionId = job.widget_version_id;
     await models
       .WidgetVersionAssets()
@@ -315,7 +315,7 @@ export const finalizeUpload = async (jobId: number) => {
       })
       .transacting(trx);
 
-    // send mail
+    // TODO: send mail
 
     await models
       .UploadJobs()

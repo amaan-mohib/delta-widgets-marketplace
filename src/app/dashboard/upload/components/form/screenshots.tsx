@@ -9,7 +9,7 @@ import {
   setTimeoutAsync,
 } from "@/lib/utils";
 import { getWidgetScreenshots } from "@/store/store-actions";
-import { useDataStore } from "@/store/useDataStore";
+import { useDataStore } from "@/store/use-data-store";
 import {
   Body1Strong,
   Button,

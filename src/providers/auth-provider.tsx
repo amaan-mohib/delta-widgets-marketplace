@@ -2,7 +2,8 @@
 
 import { getUserProfile } from "@/app/actions";
 import { authClient } from "@/lib/auth/client";
-import { IUser, useAuth } from "@/store/useAuth";
+import { IUser } from "@/lib/types/auth";
+import { useAuth } from "@/store/use-auth";
 import React, { useEffect, useRef } from "react";
 
 interface AuthProviderProps {}

@@ -2,7 +2,7 @@
 
 import WidgetPreview from "@/components/widget-preview";
 import { IGetAllWidget } from "@/lib/commands";
-import { useDataStore } from "@/store/useDataStore";
+import { useDataStore } from "@/store/use-data-store";
 import {
   Body1Strong,
   Card,

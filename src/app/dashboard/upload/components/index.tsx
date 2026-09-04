@@ -3,7 +3,7 @@
 import { APP_NAME, DEEP_LINK_BASE_URL, templateWidgets } from "@/lib/constants";
 import { Body2, Button, Link } from "@fluentui/react-components";
 import UploadList from "./list";
-import { useDataStore } from "@/store/useDataStore";
+import { useDataStore } from "@/store/use-data-store";
 import { Header } from "@/components/header";
 import UploadFooter from "./list/list-footer";
 import { useEffect, useState } from "react";

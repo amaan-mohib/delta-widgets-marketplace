@@ -13,9 +13,9 @@ import {
 import Link from "next/link";
 import { APP_NAME } from "@/lib/constants";
 import { IconBrandDiscord, IconUpload } from "@tabler/icons-react";
-import { useDataStore } from "@/store/useDataStore";
+import { useDataStore } from "@/store/use-data-store";
 import { useMemo } from "react";
-import { useAuth } from "@/store/useAuth";
+import { useAuth } from "@/store/use-auth";
 import Image from "next/image";
 
 interface HeaderProps {

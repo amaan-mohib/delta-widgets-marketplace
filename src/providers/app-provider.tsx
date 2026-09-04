@@ -1,6 +1,6 @@
 "use client";
 
-import { useDataStore } from "@/store/useDataStore";
+import { useDataStore } from "@/store/use-data-store";
 import { isTauri } from "@tauri-apps/api/core";
 import React, { useEffect } from "react";
 

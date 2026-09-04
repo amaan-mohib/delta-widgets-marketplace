@@ -1,6 +1,6 @@
 "use client";
 
-import { useDataStore } from "@/store/useDataStore";
+import { useDataStore } from "@/store/use-data-store";
 import { Button, Spinner, tokens } from "@fluentui/react-components";
 import { useState } from "react";
 

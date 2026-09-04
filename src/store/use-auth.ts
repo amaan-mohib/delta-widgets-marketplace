@@ -1,15 +1,6 @@
 import { UserProfiles } from "@/lib/db";
+import { IUser } from "@/lib/types/auth";
 import { create } from "zustand";
-
-export interface IUser {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  email: string;
-  emailVerified: boolean;
-  name: string;
-  image?: string | null;
-}
 
 interface IAuth {
   user: IUser | null;

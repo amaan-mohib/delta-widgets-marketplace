@@ -5,7 +5,7 @@ import {
   createUsername,
 } from "@/app/dashboard/welcome/actions";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useAuth } from "@/store/useAuth";
+import { useAuth } from "@/store/use-auth";
 import {
   Button,
   Field,

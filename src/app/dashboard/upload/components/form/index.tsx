@@ -1,7 +1,7 @@
 "use client";
 
 import { IUploadManifest } from "@/lib/types/manifest";
-import { useDataStore } from "@/store/useDataStore";
+import { useDataStore } from "@/store/use-data-store";
 import {
   Field,
   Input,
