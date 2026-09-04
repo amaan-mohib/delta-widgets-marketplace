@@ -1,7 +1,7 @@
 "use client";
 
 import { handleOAuthSignIn } from "@/lib/auth/client";
-import { Button } from "@fluentui/react-components";
+import { Button, Title1 } from "@fluentui/react-components";
 import { useSearchParams } from "next/navigation";
 
 interface LoginProps {}
@@ -11,14 +11,17 @@ const LoginPage: React.FC<LoginProps> = () => {
   const callback = searchParams.get("redirect");
 
   return (
-    <div>
-      <Button onClick={() => handleOAuthSignIn("google", callback)}>
-        Sign in with Google
-      </Button>
-      <Button onClick={() => handleOAuthSignIn("github", callback)}>
-        Sign in with GitHub
-      </Button>
-    </div>
+    <main>
+      <Title1>Login</Title1>
+      <div>
+        <Button onClick={() => handleOAuthSignIn("google", callback)}>
+          Sign in with Google
+        </Button>
+        <Button onClick={() => handleOAuthSignIn("github", callback)}>
+          Sign in with GitHub
+        </Button>
+      </div>
+    </main>
   );
 };
 

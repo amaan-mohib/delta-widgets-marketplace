@@ -30,6 +30,11 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
   const headerAction = useMemo(() => {
     return (
       <>
+        {user && (
+          <Button as="a" appearance="subtle" href="/dashboard">
+            Dashboard
+          </Button>
+        )}
         {isInApp ? (
           !isUpload && (
             <Button
@@ -48,15 +53,19 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
         )}
         {user && (
           <>
-            <Button as="a" appearance="subtle" href="/dashboard">
-              Dashboard
-            </Button>
             <Menu positioning="below-end">
               <MenuTrigger disableButtonEnhancement>
-                <Avatar
-                  name={user.name}
-                  color="brand"
-                  image={user.image ? { src: user.image } : {}}
+                <Button
+                  size="large"
+                  appearance="subtle"
+                  shape="circular"
+                  icon={
+                    <Avatar
+                      name={user.name}
+                      color="brand"
+                      image={user.image ? { src: user.image } : {}}
+                    />
+                  }
                 />
               </MenuTrigger>
               <MenuPopover>
@@ -87,11 +96,11 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
                 alt={APP_NAME}
                 className="h-6 w-6"
               />
-              <h1
+              <span
                 style={{ color: tokens.colorNeutralForeground2 }}
                 className="text-xl hidden sm:block">
                 {APP_NAME}
-              </h1>
+              </span>
             </Link>
           </div>
 
