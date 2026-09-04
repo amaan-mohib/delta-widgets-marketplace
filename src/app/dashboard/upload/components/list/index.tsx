@@ -1,8 +1,7 @@
 "use client";
 
 import WidgetPreview from "@/components/WidgetPreview";
-import { commands, IGetAllWidget } from "@/lib/commands";
-import { templateWidgets } from "@/lib/constants";
+import { IGetAllWidget } from "@/lib/commands";
 import { useDataStore } from "@/store/useDataStore";
 import {
   Body1Strong,
@@ -14,27 +13,20 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import { AppsAddInRegular } from "@fluentui/react-icons";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
-interface UploadListProps {}
+interface UploadListProps {
+  widgets: IGetAllWidget[];
+}
 
-const UploadList: React.FC<UploadListProps> = () => {
-  const [widgets, setWidgets] = useState<IGetAllWidget[]>([]);
+const UploadList: React.FC<UploadListProps> = ({ widgets }) => {
   const selectedWidgets = useDataStore((s) => s.selectedWidgets);
+  const widgetUploads = useDataStore((s) => s.widgetUploads);
 
   const selectedWidgetKeys = useMemo(
     () => selectedWidgets.map((i) => i.manifest.key),
     [selectedWidgets],
   );
-
-  useEffect(() => {
-    commands.getAllWidgets({ dir: "widgets" }).then((widgets) => {
-      const filtered = widgets.filter(
-        (item) => !(item.manifest.key in templateWidgets),
-      );
-      setWidgets(filtered);
-    });
-  }, []);
 
   const onSelect = (widget: IGetAllWidget, checked: boolean) => {
     if (checked) {
@@ -62,8 +54,12 @@ const UploadList: React.FC<UploadListProps> = () => {
             onSelectionChange={(_, { selected }) => {
               onSelect(widget, selected);
             }}
+            disabled={widgetUploads[widget.manifest.key]?.state === "UPLOADING"}
             floatingAction={
               <Checkbox
+                disabled={
+                  widgetUploads[widget.manifest.key]?.state === "UPLOADING"
+                }
                 aria-labelledby={`${widget.manifest.key}-id`}
                 onChange={(_, { checked }) => {
                   onSelect(widget, !!checked);

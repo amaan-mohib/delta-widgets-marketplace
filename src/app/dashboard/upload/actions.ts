@@ -1,6 +1,6 @@
 "use server";
 
-import db from "@/lib/db";
+import db, { Assets } from "@/lib/db";
 import models from "@/lib/db/models";
 import { S3, S3_BUCKET } from "@/lib/storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -157,7 +157,7 @@ export const createUploadJobs = async (
   uploadJobId: number,
   trx: Knex.Transaction,
 ) => {
-  const uploadKeyPrefix = `/widgets/${widgetKey}/${revision}`;
+  const uploadKeyPrefix = `widgets/${widgetKey}/${revision}`;
   const uploadJobFiles: IUploadJob[] = [
     {
       fileName: "manifest.json",
@@ -184,14 +184,16 @@ export const createUploadJobs = async (
       options: { contentType: "application/zip", type: "WIDGET_ASSET" },
     });
   }
-  (values.screenshots || []).forEach((item) => {
-    uploadJobFiles.push({
-      fileName: item.fileName,
-      key: `${uploadKeyPrefix}/${item.fileName}`,
-      path: item.path,
-      options: { type: "SCREENSHOT" },
+  (values.screenshots || [])
+    .filter((ss) => !ss.path.startsWith("http"))
+    .forEach((item) => {
+      uploadJobFiles.push({
+        fileName: item.fileName,
+        key: `${uploadKeyPrefix}/${item.fileName}`,
+        path: item.path,
+        options: { type: "SCREENSHOT" },
+      });
     });
-  });
 
   await models
     .UploadJobFiles()
@@ -344,12 +346,38 @@ export const getExistingVersions = async (key: string) => {
   }
 
   const widgetKey = `${user.profile.username}/${key}`;
-  return await models
+  const widget = await models
+    .Widgets()
+    .select("id", "label", "description")
+    .where("key", widgetKey)
+    .andWhere("author_id", user.id)
+    .first();
+  if (!widget) {
+    return { widget: null, versions: [], screenshots: [] };
+  }
+
+  const versions = await models
     .WidgetVersions()
-    .where(
-      "widget_id",
-      models.Widgets("w").select("w.id").where("key", widgetKey),
-    )
+    .select("id", "revision", "version", "published_at")
+    .where("widget_id", widget.id)
     .andWhere("status", "<>", "DRAFT")
     .orderBy("revision", "desc");
+
+  let screenshots: Pick<Assets, "id" | "src" | "file_name" | "size">[] = [];
+  if (versions.length > 0) {
+    screenshots = await models
+      .Assets()
+      .select("id", "file_name", "size", "src")
+      .whereIn(
+        "id",
+        models
+          .WidgetVersionAssets()
+          .select("asset_id")
+          .where("widget_version_id", versions[0].id),
+      )
+      .andWhere("asset_type", "SCREENSHOT")
+      .andWhereNot("src", "like", "%icon.png")
+      .andWhereNot("src", "like", "%thumb.png");
+  }
+  return { widget, versions, screenshots };
 };

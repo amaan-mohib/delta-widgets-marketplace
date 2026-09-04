@@ -6,23 +6,59 @@ import { IGetAllWidget } from "@/lib/commands";
 import { WidgetVersions } from "@/lib/db";
 import { IUploadManifest, IWidget } from "@/lib/types/manifest";
 import { getManifestFromPath } from "@/lib/utils";
+import { path } from "@tauri-apps/api";
 import { exists, lstat } from "@tauri-apps/plugin-fs";
 
 export interface IUploadState {
   state: "DRAFT" | "UPLOADING" | "UPLOADED" | "WARNING";
   values: IUploadManifest;
   manifest: IWidget;
-  versions: WidgetVersions[];
+  versions: Pick<
+    WidgetVersions,
+    "id" | "revision" | "version" | "published_at"
+  >[];
   errors?: IFormError[];
 }
 
-export const getWidgetScreenshots = async (widget: IGetAllWidget) => {
+const getUrlThumbnail = async (url: string) => {
+  const urlObj = new URL(url);
+  const fileName = Buffer.from(urlObj.hostname).toString("base64") + ".png";
+  const thumbPath = await path.resolve(
+    await path.appCacheDir(),
+    "thumbs",
+    fileName,
+  );
+  const thumbExists = await exists(thumbPath);
+  const screenshots: IUploadManifest["screenshots"] = [];
+  if (thumbExists) {
+    const info = await lstat(thumbPath);
+    screenshots.push({
+      fileName: "icon.png",
+      path: thumbPath,
+      fileSize: info.size,
+    });
+  }
+  return screenshots;
+};
+
+export const getWidgetScreenshots = async (
+  widget: IGetAllWidget,
+  fromCapture?: boolean,
+  customFileName?: string,
+) => {
+  if (
+    widget.manifest.widgetType === "url" &&
+    widget.manifest.url &&
+    !fromCapture
+  ) {
+    return await getUrlThumbnail(widget.manifest.url);
+  }
   const thumbExists = await exists(widget.thumbPath);
   const screenshots: IUploadManifest["screenshots"] = [];
   if (thumbExists) {
     const info = await lstat(widget.thumbPath);
     screenshots.push({
-      fileName: "thumb.png",
+      fileName: customFileName || "thumb.png",
       path: widget.thumbPath,
       fileSize: info.size,
     });
@@ -31,7 +67,11 @@ export const getWidgetScreenshots = async (widget: IGetAllWidget) => {
 };
 
 export const initializeWidget = async (widget: IGetAllWidget) => {
-  const [manifest, versions, screenshots] = await Promise.all([
+  const [
+    manifest,
+    { widget: existing, versions, screenshots: existingScreenshots },
+    screenshots,
+  ] = await Promise.all([
     getManifestFromPath(widget.manifestPath),
     getExistingVersions(widget.manifest.key),
     getWidgetScreenshots(widget),
@@ -39,11 +79,18 @@ export const initializeWidget = async (widget: IGetAllWidget) => {
   const widgetType = widget.manifest.widgetType;
   const values: IUploadManifest = {
     key: widget.manifest.key,
-    label: widget.manifest.label,
+    label: existing?.label || widget.manifest.label,
     widget_type:
       widgetType === "html" ? "HTML" : widgetType === "json" ? "JSON" : "URL",
-    description: widget.manifest.description,
-    screenshots,
+    description: existing?.description || widget.manifest.description,
+    screenshots: [
+      ...screenshots,
+      ...existingScreenshots.map((ss) => ({
+        fileName: ss.file_name,
+        path: `${process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX}${ss.src}`,
+        fileSize: ss.size ?? 0,
+      })),
+    ],
     changelog: versions.length > 0 ? "" : undefined,
   };
   const response: IUploadState = {

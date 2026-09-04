@@ -13,7 +13,7 @@ import { Highlight } from "@tiptap/extension-highlight";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { FindAndReplace } from "@tiptap/extension-find-and-replace";
-import { Selection } from "@tiptap/extensions";
+import { Placeholder, Selection } from "@tiptap/extensions";
 
 // --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button";
@@ -207,8 +207,14 @@ interface IEditor {
   content?: string;
   setContent?: (value: string) => void;
   disabled?: boolean;
+  placeholder?: string;
 }
-export function SimpleEditor({ content, setContent, disabled }: IEditor) {
+export function SimpleEditor({
+  content,
+  setContent,
+  disabled,
+  placeholder,
+}: IEditor) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
@@ -256,6 +262,7 @@ export function SimpleEditor({ content, setContent, disabled }: IEditor) {
         searchDebounceMs: 500,
         injectCSS: false,
       }),
+      Placeholder.configure({ placeholder }),
       // ImageUploadNode.configure({
       //   accept: "image/*",
       //   maxSize: MAX_FILE_SIZE,

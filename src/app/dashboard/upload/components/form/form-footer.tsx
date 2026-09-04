@@ -16,7 +16,7 @@ interface UploadFormFooterProps {}
 const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
   const selectedWidgets = useDataStore((state) => state.selectedWidgets);
   const widgetUploads = useDataStore((state) => state.widgetUploads);
-  const selectedWidgetKey = useDataStore((state) => state.selectedWidgetKey);
+  const selectedWidget = useDataStore((state) => state.selectedWidget);
   const router = useRouter();
 
   const { uploaded, notUploaded, warnings } = useMemo(() => {
@@ -52,7 +52,9 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
   }, [uploaded, selectedWidgets]);
 
   const onSubmit = async () => {
-    if (!selectedWidgetKey) return;
+    if (!selectedWidget) return;
+
+    const selectedWidgetKey = selectedWidget.manifest.key;
 
     const { values, state, manifest, versions } =
       widgetUploads[selectedWidgetKey];
@@ -70,7 +72,6 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
       manifest.file,
     );
     setWidgetUploadErrors(selectedWidgetKey, errors);
-    console.log(errors);
 
     if (errors.length > 0) {
       return;
@@ -106,7 +107,11 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
         (k) => k !== selectedWidgetKey,
       );
       if (next.length !== 0) {
-        useDataStore.setState({ selectedWidgetKey: next[0] });
+        useDataStore.setState({
+          selectedWidget: selectedWidgets.find(
+            (w) => w.manifest.key === next[0],
+          ),
+        });
       }
     } catch (error) {
       console.error(error);
@@ -123,6 +128,7 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
   };
 
   const nextIcon = useMemo(() => {
+    const selectedWidgetKey = selectedWidget?.manifest?.key;
     if (!selectedWidgetKey || !widgetUploads[selectedWidgetKey]) {
       return { icon: null, disabled: false };
     }
@@ -137,9 +143,9 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
       return { icon: <WarningRegular />, disabled: false };
     }
     return { icon: null, disabled: false };
-  }, [selectedWidgetKey, widgetUploads]);
+  }, [selectedWidget, widgetUploads]);
 
-  if (!selectedWidgetKey) return null;
+  if (!selectedWidget) return null;
 
   return (
     <footer

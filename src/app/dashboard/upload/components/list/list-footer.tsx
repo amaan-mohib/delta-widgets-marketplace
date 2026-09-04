@@ -18,7 +18,7 @@ const UploadFooter: React.FC<UploadFooterProps> = () => {
       setLoading(false);
       useDataStore.setState({
         uploadStep: "form",
-        selectedWidgetKey: selectedWidgets[0].manifest.key,
+        selectedWidget: selectedWidgets[0],
       });
     } catch (error) {
       setLoading(false);

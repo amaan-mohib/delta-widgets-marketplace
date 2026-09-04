@@ -1,7 +1,15 @@
 "use client";
 
+import { commands } from "@/lib/commands";
 import { IUploadManifest } from "@/lib/types/manifest";
-import { humanStorageSize } from "@/lib/utils";
+import {
+  closeWidgetWindow,
+  createWidgetWindow,
+  humanStorageSize,
+  setTimeoutAsync,
+} from "@/lib/utils";
+import { getWidgetScreenshots } from "@/store/store-actions";
+import { useDataStore } from "@/store/useDataStore";
 import {
   Body1Strong,
   Button,
@@ -14,6 +22,7 @@ import {
   AddRegular,
   ArrowDown16Regular,
   ArrowUp16Regular,
+  CameraRegular,
   Delete16Regular,
 } from "@fluentui/react-icons";
 import { path } from "@tauri-apps/api";
@@ -21,6 +30,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { message, open } from "@tauri-apps/plugin-dialog";
 import { lstat } from "@tauri-apps/plugin-fs";
 import { arrayMoveImmutable } from "array-move";
+import { useMemo, useState } from "react";
 
 interface FormScreenshotsProps {
   screenshots: IUploadManifest["screenshots"];
@@ -33,6 +43,9 @@ const FormScreenshots: React.FC<FormScreenshotsProps> = ({
   onChange,
   disabled,
 }) => {
+  const selectedWidget = useDataStore((s) => s.selectedWidget);
+  const [captureLoading, setCaptureLoading] = useState(false);
+
   const addScreenshot = async () => {
     try {
       const ssPaths = await open({
@@ -64,6 +77,41 @@ const FormScreenshots: React.FC<FormScreenshotsProps> = ({
     }
   };
 
+  const captureScreenshot = async () => {
+    if (!selectedWidget) return;
+    try {
+      setCaptureLoading(true);
+      const label = `widget-${selectedWidget.manifest.key}`;
+      const visible = selectedWidget.manifest.visible || false;
+      if (!visible) {
+        await createWidgetWindow(selectedWidget.manifestPath);
+      }
+      await setTimeoutAsync(2000);
+      const customName = `capture-${new Date().getTime()}.png`;
+      await commands.captureWidgetScreenshot({
+        label,
+        manifestPath: selectedWidget.manifestPath,
+        refresh: true,
+        customName,
+      });
+      if (!visible) {
+        await closeWidgetWindow(label);
+      }
+      const newScreenshots = await getWidgetScreenshots(
+        selectedWidget,
+        true,
+        customName,
+      );
+      onChange([...screenshots, ...newScreenshots]);
+      setCaptureLoading(false);
+    } catch (error) {
+      setCaptureLoading(false);
+      message("Something went wrong while capturing screenshot", {
+        kind: "error",
+      }).catch(console.error);
+    }
+  };
+
   const removeScreenshot = (ssPath: string) => {
     onChange(screenshots.filter((ss) => ss.path !== ssPath));
   };
@@ -75,10 +123,14 @@ const FormScreenshots: React.FC<FormScreenshotsProps> = ({
   return (
     <div className="flex flex-col gap-3">
       {screenshots.map((ss, index) => (
-        <Card key={ss.path} appearance="outline" size="small">
+        <Card
+          key={`${ss.path}+${ss.fileName}`}
+          appearance="outline"
+          size="small">
           <CardHeader
             image={
               <img
+                className="object-scale-down"
                 src={
                   ss.path.startsWith("http") ? ss.path : convertFileSrc(ss.path)
                 }
@@ -136,16 +188,28 @@ const FormScreenshots: React.FC<FormScreenshotsProps> = ({
           </CardFooter>
         </Card>
       ))}
-      <Button
-        icon={<AddRegular />}
-        appearance="secondary"
-        disabled={disabled}
-        onClick={(e) => {
-          e.preventDefault();
-          addScreenshot();
-        }}>
-        Add screenshots
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          icon={<AddRegular />}
+          appearance="secondary"
+          disabled={disabled}
+          onClick={(e) => {
+            e.preventDefault();
+            addScreenshot();
+          }}>
+          Add screenshots
+        </Button>
+        <Button
+          icon={<CameraRegular />}
+          appearance="secondary"
+          disabled={disabled || captureLoading}
+          onClick={(e) => {
+            e.preventDefault();
+            captureScreenshot();
+          }}>
+          Capture screenshot
+        </Button>
+      </div>
     </div>
   );
 };

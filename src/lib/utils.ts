@@ -1,5 +1,8 @@
+"use client";
+
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import { IWidget } from "./types/manifest";
+import { commands } from "./commands";
 
 export const cloneObject = <T>(obj: T) => {
   return JSON.parse(JSON.stringify(obj)) as T;
@@ -43,3 +46,21 @@ export const getManifestFromPath = async (manifestPath: string) => {
   const manifest = await readTextFile(manifestPath);
   return JSON.parse(manifest) as Omit<IWidget, "path">;
 };
+
+export const createWidgetWindow = async (manifestPath: string) => {
+  await commands.createWidgetWindow({
+    path: JSON.stringify(manifestPath),
+    isPreview: false,
+  });
+};
+
+export const closeWidgetWindow = async (label: string) => {
+  await commands.closeWidgetWindow({ label });
+};
+
+export const setTimeoutAsync = (timeout: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, timeout);
+  });

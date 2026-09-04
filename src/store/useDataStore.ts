@@ -11,7 +11,7 @@ interface IDataStore {
   isInApp: boolean;
   selectedWidgets: IGetAllWidget[];
   uploadStep: "select" | "form" | null;
-  selectedWidgetKey: string | null;
+  selectedWidget: IGetAllWidget | null;
   widgetUploads: Record<string, IUploadState>;
   initializeWidgetUpload: (widgets: IGetAllWidget[]) => Promise<void>;
   setWidgetUploadState: (key: string, state: IUploadState["state"]) => void;
@@ -26,7 +26,7 @@ export const useDataStore = create<IDataStore>((set, get) => ({
   isInApp: false,
   selectedWidgets: [],
   uploadStep: null,
-  selectedWidgetKey: null,
+  selectedWidget: null,
   widgetUploads: {},
   async initializeWidgetUpload(widgets) {
     const uploads = get().widgetUploads;

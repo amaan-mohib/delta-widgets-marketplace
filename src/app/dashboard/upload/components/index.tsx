@@ -1,22 +1,35 @@
 "use client";
 
-import { APP_NAME, DEEP_LINK_BASE_URL } from "@/lib/constants";
+import { APP_NAME, DEEP_LINK_BASE_URL, templateWidgets } from "@/lib/constants";
 import { Body2, Button, Link } from "@fluentui/react-components";
 import UploadList from "./list";
 import { useDataStore } from "@/store/useDataStore";
 import { Header } from "@/components/header";
 import UploadFooter from "./list/list-footer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import UploadForm from "./form";
 import UploadFormFooter from "./form/form-footer";
+import { commands, IGetAllWidget } from "@/lib/commands";
 
 interface UploadPageProps {}
 
 const UploadPage: React.FC<UploadPageProps> = () => {
+  const [widgets, setWidgets] = useState<IGetAllWidget[]>([]);
   const { isInApp, uploadStep } = useDataStore();
 
   useEffect(() => {
-    useDataStore.setState({ uploadStep: "select" });
+    commands.getAllWidgets({ dir: "widgets" }).then((widgets) => {
+      const filtered = widgets.filter(
+        (item) => !(item.manifest.key in templateWidgets),
+      );
+      setWidgets(filtered);
+    });
+    useDataStore.setState({
+      uploadStep: "select",
+      widgetUploads: {},
+      selectedWidgets: [],
+      selectedWidget: null,
+    });
   }, []);
 
   if (!isInApp) {
@@ -42,7 +55,7 @@ const UploadPage: React.FC<UploadPageProps> = () => {
         <Header isDashboard isUpload />
       </div>
       <div style={{ minHeight: "var(--body-height)" }}>
-        {uploadStep === "select" && <UploadList />}
+        {uploadStep === "select" && <UploadList widgets={widgets} />}
         {uploadStep === "form" && <UploadForm />}
       </div>
       <div className="sticky bottom-0 w-full z-99">

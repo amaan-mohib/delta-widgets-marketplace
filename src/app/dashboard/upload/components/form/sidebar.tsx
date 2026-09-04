@@ -13,7 +13,7 @@ interface UploadFormSidebarProps {}
 
 const UploadFormSidebar: React.FC<UploadFormSidebarProps> = () => {
   const selectedWidgets = useDataStore((s) => s.selectedWidgets);
-  const selectedWidgetKey = useDataStore((s) => s.selectedWidgetKey);
+  const selectedWidget = useDataStore((s) => s.selectedWidget);
   const widgetUploads = useDataStore((s) => s.widgetUploads);
 
   const getStateWidgetIcon = useCallback(
@@ -46,12 +46,14 @@ const UploadFormSidebar: React.FC<UploadFormSidebarProps> = () => {
         <Button
           key={item.manifest.key}
           onClick={() => {
-            useDataStore.setState({ selectedWidgetKey: item.manifest.key });
+            useDataStore.setState({ selectedWidget: item });
           }}
           icon={getStateWidgetIcon(item.manifest.key)}
           className="w-full"
           appearance={
-            selectedWidgetKey === item.manifest.key ? "primary" : "subtle"
+            selectedWidget?.manifest?.key === item.manifest.key
+              ? "primary"
+              : "subtle"
           }>
           {item.manifest.label}
         </Button>

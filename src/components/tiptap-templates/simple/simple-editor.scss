@@ -1,5 +1,5 @@
 body {
-  --tt-toolbar-height: 44px;
+  --tt-toolbar-height: 88px;
   --tt-theme-text: var(--tt-gray-light-900);
 
   .dark & {
@@ -12,6 +12,8 @@ body {
   height: 100%;
   overflow: auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .simple-editor-search-and-replace {
@@ -26,7 +28,7 @@ body {
   max-width: 648px;
   width: 100%;
   margin: 0 auto;
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   flex: 1;
