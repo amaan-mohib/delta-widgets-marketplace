@@ -324,37 +324,37 @@ export const finalizeUpload = async (jobId: number) => {
     });
 
     const widgetVersionId = job.widget_version_id;
-    await models
-      .WidgetVersionAssets()
-      .insert(
-        assetsToInsert.map(({ asset_id, sort_order }) => ({
-          asset_id,
-          sort_order,
-          widget_version_id: widgetVersionId,
-        })),
-      )
-      .transacting(trx);
-
-    await models
-      .WidgetVersions()
-      .where("id", widgetVersionId)
-      .update({
-        status: "IN_REVIEW",
-      })
-      .transacting(trx);
+    await Promise.all([
+      models
+        .WidgetVersionAssets()
+        .insert(
+          assetsToInsert.map(({ asset_id, sort_order }) => ({
+            asset_id,
+            sort_order,
+            widget_version_id: widgetVersionId,
+          })),
+        )
+        .transacting(trx),
+      models
+        .WidgetVersions()
+        .where("id", widgetVersionId)
+        .update({
+          status: "IN_REVIEW",
+        })
+        .transacting(trx),
+      models
+        .UploadJobs()
+        .where("id", jobId)
+        .update({ status: "COMPLETED" })
+        .transacting(trx),
+      models
+        .UploadJobFiles()
+        .where("job_id", jobId)
+        .update({ status: "COMPLETED" })
+        .transacting(trx),
+    ]);
 
     // TODO: send mail
-
-    await models
-      .UploadJobs()
-      .where("id", jobId)
-      .update({ status: "COMPLETED" })
-      .transacting(trx);
-    await models
-      .UploadJobFiles()
-      .where("job_id", jobId)
-      .update({ status: "COMPLETED" })
-      .transacting(trx);
 
     await trx.commit();
   } catch (error) {
