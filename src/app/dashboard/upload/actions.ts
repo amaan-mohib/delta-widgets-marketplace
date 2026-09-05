@@ -1,6 +1,6 @@
 "use server";
 
-import db, { Assets } from "@/lib/db";
+import db, { Assets, Table } from "@/lib/db";
 import models from "@/lib/db/models";
 import { S3, S3_BUCKET } from "@/lib/storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -15,6 +15,7 @@ interface IUploadJob {
   key: string;
   path?: string;
   options?: any;
+  sortOrder: number;
 }
 
 async function createSignedUrl(file: IUploadJob) {
@@ -164,6 +165,7 @@ export const createUploadJobs = async (
       key: `${uploadKeyPrefix}/manifest.json`,
       options: { contentType: "application/json", type: "MANIFEST" },
       path: manifest.path,
+      sortOrder: 0,
     },
   ];
   if (manifest.widgetType === "html") {
@@ -172,6 +174,7 @@ export const createUploadJobs = async (
       key: `${uploadKeyPrefix}/assets.zip`,
       options: { contentType: "application/zip", type: "WIDGET_ASSET" },
       path: manifest.file,
+      sortOrder: 0,
     });
   }
   if (
@@ -182,18 +185,20 @@ export const createUploadJobs = async (
       fileName: "assets.zip",
       key: `${uploadKeyPrefix}/assets.zip`,
       options: { contentType: "application/zip", type: "WIDGET_ASSET" },
+      sortOrder: 0,
     });
   }
-  (values.screenshots || [])
-    .filter((ss) => !ss.path.startsWith("http"))
-    .forEach((item) => {
-      uploadJobFiles.push({
-        fileName: item.fileName,
-        key: `${uploadKeyPrefix}/${item.fileName}`,
-        path: item.path,
-        options: { type: "SCREENSHOT" },
-      });
+  (values.screenshots || []).forEach((item, index) => {
+    uploadJobFiles.push({
+      fileName: item.fileName,
+      key: item.assetId
+        ? `asset_id:${item.assetId}`
+        : `${uploadKeyPrefix}/${item.fileName}`,
+      path: item.path,
+      options: { type: "SCREENSHOT" },
+      sortOrder: index,
     });
+  });
 
   await models
     .UploadJobFiles()
@@ -203,12 +208,15 @@ export const createUploadJobs = async (
         file_name: item.fileName,
         object_key: item.key,
         options: item.options ? JSON.stringify(item.options) : undefined,
+        sort_order: item.sortOrder,
       })),
     )
     .transacting(trx);
 
   const uploadJobs = await Promise.all(
-    uploadJobFiles.map((file) => createSignedUrl(file)),
+    uploadJobFiles
+      .filter((file) => !file.key.startsWith("asset_id"))
+      .map((file) => createSignedUrl(file)),
   );
 
   return uploadJobs;
@@ -268,8 +276,12 @@ export const finalizeUpload = async (jobId: number) => {
     }
 
     const files = await models.UploadJobFiles().where("job_id", jobId);
+    const filesWithoutAssetId = files.filter(
+      (f) => !f.object_key.startsWith("asset_id"),
+    );
+
     const output = await Promise.all(
-      files.map((item) =>
+      filesWithoutAssetId.map((item) =>
         S3.send(
           new HeadObjectCommand({
             Bucket: S3_BUCKET,
@@ -279,10 +291,10 @@ export const finalizeUpload = async (jobId: number) => {
       ),
     );
 
-    const assetIds = await models
+    const newAssets = await models
       .Assets()
       .insert(
-        files.map((file, index) => {
+        filesWithoutAssetId.map((file, index) => {
           const options = JSON.parse(file.options || "{}");
           return {
             file_name: file.file_name,
@@ -293,15 +305,31 @@ export const finalizeUpload = async (jobId: number) => {
           };
         }),
       )
-      .returning("id")
+      .returning("*")
       .transacting(trx);
-    // TODO: add sort order
+
+    const assetIdToKeyMap: Record<string, number> = {};
+    newAssets.forEach((item) => {
+      assetIdToKeyMap[item.src] = item.id;
+    });
+
+    const assetsToInsert: { asset_id: number; sort_order: number }[] = [];
+    files.forEach((item) => {
+      assetsToInsert.push({
+        asset_id: item.object_key.startsWith("asset_id")
+          ? Number(item.object_key.replace("asset_id:", ""))
+          : assetIdToKeyMap[item.object_key],
+        sort_order: item.sort_order ?? 0,
+      });
+    });
+
     const widgetVersionId = job.widget_version_id;
     await models
       .WidgetVersionAssets()
       .insert(
-        assetIds.map(({ id }) => ({
-          asset_id: id,
+        assetsToInsert.map(({ asset_id, sort_order }) => ({
+          asset_id,
+          sort_order,
           widget_version_id: widgetVersionId,
         })),
       )
@@ -366,18 +394,14 @@ export const getExistingVersions = async (key: string) => {
   let screenshots: Pick<Assets, "id" | "src" | "file_name" | "size">[] = [];
   if (versions.length > 0) {
     screenshots = await models
-      .Assets()
-      .select("id", "file_name", "size", "src")
-      .whereIn(
-        "id",
-        models
-          .WidgetVersionAssets()
-          .select("asset_id")
-          .where("widget_version_id", versions[0].id),
-      )
-      .andWhere("asset_type", "SCREENSHOT")
-      .andWhereNot("src", "like", "%icon.png")
-      .andWhereNot("src", "like", "%thumb.png");
+      .Assets("a")
+      .select("a.id", "a.file_name", "a.size", "a.src")
+      .join({ w: Table.WidgetVersionAssets }, "a.id", "w.asset_id")
+      .where("w.widget_version_id", versions[0].id)
+      .andWhere("a.asset_type", "SCREENSHOT")
+      .andWhereNot("a.src", "like", "%icon.png")
+      .andWhereNot("a.src", "like", "%thumb.png")
+      .orderBy("w.sort_order");
   }
   return { widget, versions, screenshots };
 };

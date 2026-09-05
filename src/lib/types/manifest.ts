@@ -69,5 +69,6 @@ export interface IUploadManifest {
     fileName: string;
     path: string;
     fileSize?: number;
+    assetId?: number;
   }[];
 }

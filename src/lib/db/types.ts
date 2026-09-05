@@ -197,6 +197,7 @@ export type UploadJobFiles = {
   options: string | null;
   created_at: Date;
   updated_at: Date;
+  sort_order: number;
 };
 
 export type UploadJobs = {
@@ -239,6 +240,7 @@ export type WidgetLikes = {
 export type WidgetVersionAssets = {
   widget_version_id: number;
   asset_id: number;
+  sort_order: number;
 };
 
 export type WidgetVersions = {

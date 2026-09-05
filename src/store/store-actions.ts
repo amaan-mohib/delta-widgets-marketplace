@@ -84,6 +84,7 @@ export const initializeWidget = async (widget: IGetAllWidget) => {
         fileName: ss.file_name,
         path: `${process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX}${ss.src}`,
         fileSize: ss.size ?? 0,
+        assetId: ss.id,
       })),
     ],
     changelog: versions.length > 0 ? "" : undefined,
