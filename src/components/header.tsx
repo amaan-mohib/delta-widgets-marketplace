@@ -70,7 +70,7 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
               </MenuTrigger>
               <MenuPopover>
                 <MenuList>
-                  <MenuItemLink href="/profile">Profile</MenuItemLink>
+                  <MenuItemLink href="/dashboard/profile">Profile</MenuItemLink>
                   <MenuItemLink href="/logout">Log out</MenuItemLink>
                 </MenuList>
               </MenuPopover>

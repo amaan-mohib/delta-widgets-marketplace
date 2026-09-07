@@ -7,7 +7,9 @@ import RootLayout from "@/components/root-layout";
 
 const Widgets = async () => {
   const templates = await test();
-  return templates.map((item) => <WidgetCard key={item.key} widget={item} />);
+  return templates.map((item) => (
+    <WidgetCard key={item.key} widget={item as any} />
+  ));
 };
 
 export default async function Home() {

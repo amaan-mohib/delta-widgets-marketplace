@@ -39,6 +39,7 @@
   --sidebar-ring: #69afbf;
 
   --header-height: 60px;
+  --dashboard-sidebar-width: 250px;
 }
 
 /* Updated to use proper dark theme implementation */
@@ -139,6 +140,14 @@ main,
 .upload-form {
   --body-height: calc(100vh - var(--header-height) * 2);
   --widget-list-sidebar: 250px;
+}
+
+.dashboard-nav {
+  height: calc(100vh - var(--header-height));
+  width: var(--dashboard-sidebar-width);
+  position: sticky;
+  top: var(--header-height);
+  left: 0;
 }
 
 .md-body {

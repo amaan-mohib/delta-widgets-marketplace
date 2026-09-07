@@ -82,3 +82,20 @@ export const getUrlThumbnailPath = async (url: string) => {
     return null;
   }
 };
+
+export const getStatusText = (status: string) => {
+  switch (status) {
+    case "DRAFT":
+      return "Draft";
+    case "IN_REVIEW":
+      return "In Review";
+    case "PUBLISHED":
+      return "Published";
+    case "REJECTED":
+      return "Rejected";
+    case "SUSPENDED":
+      return "Suspended";
+    default:
+      return "";
+  }
+};

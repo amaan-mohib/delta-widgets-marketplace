@@ -1,19 +1,19 @@
 import { Header } from "@/components/header";
-import DashboardSidebar from "./components/sidebar";
+import DashboardSidebar from "../components/sidebar";
 
 export const instant = false;
 
-interface DashboardProps {}
+interface ProfileProps {}
 
-const Dashboard: React.FC<DashboardProps> = () => {
+const Profile: React.FC<ProfileProps> = () => {
   return (
     <>
       <Header isDashboard />
       <main className="container flex mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <DashboardSidebar activeTab="dashboard" />
+        <DashboardSidebar activeTab="profile" />
       </main>
     </>
   );
 };
 
-export default Dashboard;
+export default Profile;

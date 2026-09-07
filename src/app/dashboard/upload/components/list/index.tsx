@@ -68,7 +68,7 @@ const UploadList: React.FC<UploadListProps> = ({ widgets }) => {
               />
             }
             appearance="filled-alternative"
-            className="min-h-42.5">
+            className="h-full min-h-42.5">
             <CardHeader
               header={
                 <Body1Strong id={`${widget.manifest.key}-id`}>

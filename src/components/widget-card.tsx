@@ -1,54 +1,71 @@
 "use client";
 
+import { getStatusText } from "@/lib/utils";
 import {
+  Badge,
   Body1Strong,
   Caption1,
   Card,
   CardHeader,
   CardPreview,
-  Link,
+  tokens,
 } from "@fluentui/react-components";
 import { IconDownload, IconHeart } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
-import React from "react";
 
 interface WidgetCardProps {
-  widget: any;
+  widget: {
+    id: number;
+    key: string;
+    label: string;
+    creator: string;
+    screenshot_src: string;
+    download_count: string | number | null;
+    status?: string;
+    likes?: number;
+  };
+  showStatus?: boolean;
 }
 
-const WidgetCard: React.FC<WidgetCardProps> = ({ widget }) => {
-  const router = useRouter();
-
+const WidgetCard: React.FC<WidgetCardProps> = ({ widget, showStatus }) => {
   return (
-    <Card
-      appearance="filled-alternative"
-      onClick={() => router.push(`/widget/${widget.key}`)}>
-      <CardHeader
-        header={<Body1Strong>{widget.label}</Body1Strong>}
-        description={
-          <Caption1>
-            <Link
-              href={`/user/@${widget.creator}`}
-              onClick={(e) => e.stopPropagation()}>
+    <a href={`/widget/${widget.key}`}>
+      <Card
+        appearance="filled-alternative"
+        onClick={() => {}}
+        className="h-full min-h-42.5">
+        <CardHeader
+          header={<Body1Strong>{widget.label}</Body1Strong>}
+          description={
+            <Caption1 style={{ color: tokens.colorBrandForegroundLink }}>
               @{widget.creator}
-            </Link>
-          </Caption1>
-        }
-      />
-      <CardPreview className="p-3 my-auto">
-        <img src={widget.thumbnail} alt={widget.label} style={{ width: 200 }} />
-      </CardPreview>
-      <div className="flex items-center justify-center gap-3">
-        <div className="flex items-center gap-1">
-          <IconDownload style={{ width: 18 }} />{" "}
-          <Caption1>{widget.downloads}</Caption1>
+            </Caption1>
+          }
+        />
+        <CardPreview className="p-3 my-auto h-full">
+          <img
+            className="object-scale-down"
+            src={
+              process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + widget.screenshot_src
+            }
+            alt={widget.label}
+            style={{ maxHeight: 150 }}
+          />
+        </CardPreview>
+        <div className="flex items-center justify-center gap-3">
+          {showStatus && widget.status && (
+            <Badge className="mr-auto">{getStatusText(widget.status)}</Badge>
+          )}
+          <div className="flex items-center gap-1">
+            <IconDownload style={{ width: 18 }} />{" "}
+            <Caption1>{widget.download_count || 0}</Caption1>
+          </div>
+          <div className="flex items-center gap-1">
+            <IconHeart style={{ width: 18 }} />{" "}
+            <Caption1>{widget.likes ?? 0}</Caption1>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <IconHeart style={{ width: 18 }} />{" "}
-          <Caption1>{widget.downloads}</Caption1>
-        </div>
-      </div>
-    </Card>
+      </Card>
+    </a>
   );
 };
 

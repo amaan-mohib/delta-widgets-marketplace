@@ -1,0 +1,76 @@
+"use server";
+
+import { getAuthUser } from "@/app/actions";
+import { Table, Widgets, WidgetVersions } from "@/lib/db";
+import models from "@/lib/db/models";
+import { redirect } from "next/navigation";
+
+const PAGE_SIZE = 30;
+
+export const getUserWidgets = async (page: number, pageSize?: number) => {
+  const user = await getAuthUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  pageSize = pageSize || PAGE_SIZE;
+
+  const widgets: (Pick<
+    Widgets,
+    "id" | "key" | "label" | "download_count" | "widget_type" | "published_at"
+  > &
+    Pick<WidgetVersions, "version" | "status"> & {
+      screenshot_src: string;
+      version_id: number;
+    })[] = await models
+    .Widgets("w")
+    .select(
+      "w.id",
+      "w.key",
+      "w.label",
+      "w.download_count",
+      "w.widget_type",
+      "w.published_at",
+      "wv.id as version_id",
+      "wv.version",
+      "wv.status",
+      models
+        .Assets("a")
+        .join({ wva: Table.WidgetVersionAssets }, "a.id", "wva.asset_id")
+        .whereRaw("wva.widget_version_id = wv.id")
+        .where("a.asset_type", "SCREENSHOT")
+        .orderBy("wva.sort_order")
+        .limit(1)
+        .select("a.src")
+        .as("screenshot_src"),
+    )
+    .joinRaw(
+      `JOIN (
+          SELECT DISTINCT ON (widget_id) *
+          FROM ${Table.WidgetVersions}
+          ORDER BY widget_id, created_at DESC
+        ) wv ON w.id = wv.widget_id`,
+    )
+    .where("w.author_id", user.id)
+    .orderBy("w.created_at", "desc")
+    .limit(pageSize)
+    .offset((page - 1) * pageSize);
+
+  const total = await models
+    .Widgets()
+    .count("id")
+    .where("author_id", user.id)
+    .first();
+
+  const likes = await models
+    .WidgetLikes()
+    .select("widget_id")
+    .count("widget_id")
+    .whereIn(
+      "widget_id",
+      widgets.map((w) => w.id),
+    )
+    .groupBy("widget_id");
+
+  return { widgets, total: Number(total?.count ?? 0), likes };
+};
