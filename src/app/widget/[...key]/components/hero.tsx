@@ -11,9 +11,10 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import {
   ArrowDownloadRegular,
+  HeartFilled,
   HeartRegular,
   ShareRegular,
 } from "@fluentui/react-icons";
@@ -34,6 +35,9 @@ const Hero: React.FC<HeroProps> = ({
   isAuthor,
   version,
 }) => {
+  const [liked, setLiked] = useState(false);
+  const [likesNum, setLikesNum] = useState(likes);
+
   return (
     <section className="mt-5">
       <div className="flex flex-col">
@@ -55,30 +59,56 @@ const Hero: React.FC<HeroProps> = ({
           </Body1>
         </Link>
       </div>
-      <div className="mt-5">
-        <div className="flex items-center">
-          <Button
-            appearance="subtle"
-            size="large"
-            shape="circular"
-            icon={<HeartRegular />}
-          />
-          <Text>{likes}</Text>
-          <div className="mx-3">
-            <Divider vertical />
-          </div>
-          <ArrowDownloadRegular fontSize={24} />
-          <Text className="ml-1">{widget.download_count}</Text>
-        </div>
-      </div>
       <div className="flex items-center gap-2 mt-5">
         <Button
           appearance="primary"
           size="large"
           icon={<ArrowDownloadRegular />}>
-          Install
+          <span>Install</span>
+          {Number(widget.download_count ?? 0) > 0 && (
+            <>
+              <Divider vertical className="mx-2" appearance="brand" />
+              <span>{widget.download_count}</span>
+            </>
+          )}
         </Button>
-        <Button appearance="subtle" size="large" icon={<ShareRegular />}>
+        <Button
+          appearance="subtle"
+          size="large"
+          icon={liked ? <HeartFilled /> : <HeartRegular />}
+          onClick={() => {
+            if (liked) {
+              setLiked(false);
+              setLikesNum((prev) => prev - 1);
+            } else {
+              setLiked(true);
+              setLikesNum((prev) => prev + 1);
+            }
+          }}>
+          <span>Like</span>
+          {likesNum > 0 && (
+            <>
+              <Divider vertical className="mx-2" />
+              <span>{likesNum || "0"}</span>
+            </>
+          )}
+        </Button>
+        <Button
+          appearance="subtle"
+          size="large"
+          icon={<ShareRegular />}
+          onClick={async () => {
+            if (navigator.share) {
+              try {
+                await navigator.share({
+                  title: `Check out ${widget.label} on Delta Widgets!`,
+                  url: window.location.href,
+                });
+              } catch (err) {
+                console.error(err);
+              }
+            }
+          }}>
           Share
         </Button>
       </div>

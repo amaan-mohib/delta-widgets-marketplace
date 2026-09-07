@@ -1,7 +1,5 @@
 "use client";
 
-// import { handleOAuthSignIn } from "@/app/api/auth/signup/actions";
-// import { authClient, handleOAuthSignIn } from "@/lib/auth/client";
 import {
   Body1,
   Button,
@@ -17,8 +15,6 @@ import {
   TagRegular,
 } from "@fluentui/react-icons";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { isTauri } from "@tauri-apps/api/core";
 
 interface HeroProps {
   tab: "discover" | "categories" | "tags";
@@ -26,18 +22,6 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ tab }) => {
   const router = useRouter();
-
-  // useEffect(() => {
-  //   authClient.getSession().then(({ data }) => {
-  //     console.log(data);
-
-  //     if (data?.session) {
-  //       // setUser(data.session.user);
-  //     }
-  //     // setLoading(false);
-  //   });
-  // }, []);
-
   return (
     <section>
       <div className="flex flex-col gap-2 pt-8 pb-5">
@@ -47,10 +31,7 @@ const Hero: React.FC<HeroProps> = ({ tab }) => {
           to make your own.
         </Body1>
       </div>
-      {/* <button onClick={() => handleOAuthSignIn("google")}>
-        sign in google
-      </button> */}
-      <div className="flex items-center justify-between overflow-auto">
+      <div className="flex items-center overflow-auto flex-wrap">
         <div>
           <TabList
             selectedValue={tab}
@@ -78,7 +59,7 @@ const Hero: React.FC<HeroProps> = ({ tab }) => {
             </Tab>
           </TabList>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-10">
           <Button
             appearance="subtle"
             icon={<SearchRegular />}
