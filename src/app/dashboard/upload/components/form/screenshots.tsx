@@ -9,7 +9,7 @@ import {
   setTimeoutAsync,
 } from "@/lib/utils";
 import { getWidgetScreenshots } from "@/store/store-actions";
-import { useDataStore } from "@/store/use-data-store";
+import { useUploadStore } from "@/store/use-upload-store";
 import {
   Body1Strong,
   Button,
@@ -30,7 +30,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { message, open } from "@tauri-apps/plugin-dialog";
 import { lstat } from "@tauri-apps/plugin-fs";
 import { arrayMoveImmutable } from "array-move";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 interface FormScreenshotsProps {
   screenshots: IUploadManifest["screenshots"];
@@ -43,7 +43,7 @@ const FormScreenshots: React.FC<FormScreenshotsProps> = ({
   onChange,
   disabled,
 }) => {
-  const selectedWidget = useDataStore((s) => s.selectedWidget);
+  const selectedWidget = useUploadStore((s) => s.selectedWidget);
   const [captureLoading, setCaptureLoading] = useState(false);
 
   const addScreenshot = async () => {

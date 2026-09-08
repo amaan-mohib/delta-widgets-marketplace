@@ -10,8 +10,6 @@ import {
 } from "@fluentui/react-components";
 import { useServerInsertedHTML } from "next/navigation";
 import { darkTheme } from "@/lib/themes";
-import { useDataStore } from "@/store/use-data-store";
-import { isTauri } from "@tauri-apps/api/core";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [renderer] = React.useState(() => createDOMRenderer());

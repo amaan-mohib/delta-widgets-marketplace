@@ -11,12 +11,14 @@ import UploadForm from "./form";
 import UploadFormFooter from "./form/form-footer";
 import { commands, IGetAllWidget } from "@/lib/commands";
 import RootLayout from "@/components/root-layout";
+import { useUploadStore } from "@/store/use-upload-store";
 
 interface UploadPageProps {}
 
 const UploadPage: React.FC<UploadPageProps> = () => {
   const [widgets, setWidgets] = useState<IGetAllWidget[]>([]);
-  const { isInApp, uploadStep } = useDataStore();
+  const { isInApp } = useDataStore();
+  const uploadStep = useUploadStore((s) => s.uploadStep);
 
   useEffect(() => {
     if (!isInApp) return;
@@ -27,7 +29,7 @@ const UploadPage: React.FC<UploadPageProps> = () => {
       );
       setWidgets(filtered);
     });
-    useDataStore.setState({
+    useUploadStore.setState({
       uploadStep: "select",
       widgetUploads: {},
       selectedWidgets: [],

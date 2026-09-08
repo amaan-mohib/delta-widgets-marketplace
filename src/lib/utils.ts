@@ -99,3 +99,18 @@ export const getStatusText = (status: string) => {
       return "";
   }
 };
+
+export const getStore = async () => {
+  try {
+    const storePath = await path.resolve(await path.appDataDir(), "store.json");
+    const store = await readTextFile(storePath);
+    return JSON.parse(store) as Record<string, any>;
+  } catch (error) {
+    return {};
+  }
+};
+
+export const getClientId = async () => {
+  const store = await getStore();
+  return store.clientId as string | undefined;
+};

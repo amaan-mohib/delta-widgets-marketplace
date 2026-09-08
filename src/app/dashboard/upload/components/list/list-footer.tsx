@@ -1,6 +1,6 @@
 "use client";
 
-import { useDataStore } from "@/store/use-data-store";
+import { useUploadStore } from "@/store/use-upload-store";
 import { Button, Spinner, tokens } from "@fluentui/react-components";
 import { useState } from "react";
 
@@ -8,15 +8,15 @@ interface UploadFooterProps {}
 
 const UploadFooter: React.FC<UploadFooterProps> = () => {
   const [loading, setLoading] = useState(false);
-  const selectedWidgets = useDataStore((state) => state.selectedWidgets);
+  const selectedWidgets = useUploadStore((state) => state.selectedWidgets);
 
   const onSubmit = async () => {
     try {
       if (selectedWidgets.length === 0) return;
       setLoading(true);
-      await useDataStore.getState().initializeWidgetUpload(selectedWidgets);
+      await useUploadStore.getState().initializeWidgetUpload(selectedWidgets);
       setLoading(false);
-      useDataStore.setState({
+      useUploadStore.setState({
         uploadStep: "form",
         selectedWidget: selectedWidgets[0],
       });

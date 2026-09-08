@@ -1,6 +1,5 @@
 "use client";
 
-import { useDataStore } from "@/store/use-data-store";
 import { Button, Spinner, tokens } from "@fluentui/react-components";
 import { CheckmarkRegular, WarningRegular } from "@fluentui/react-icons";
 import React, { useEffect, useMemo } from "react";
@@ -10,13 +9,14 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { commands } from "@/lib/commands";
 import { validateForm } from "./utils";
 import { useRouter } from "next/navigation";
+import { useUploadStore } from "@/store/use-upload-store";
 
 interface UploadFormFooterProps {}
 
 const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
-  const selectedWidgets = useDataStore((state) => state.selectedWidgets);
-  const widgetUploads = useDataStore((state) => state.widgetUploads);
-  const selectedWidget = useDataStore((state) => state.selectedWidget);
+  const selectedWidgets = useUploadStore((state) => state.selectedWidgets);
+  const widgetUploads = useUploadStore((state) => state.widgetUploads);
+  const selectedWidget = useUploadStore((state) => state.selectedWidget);
   const router = useRouter();
 
   const { uploaded, notUploaded, warnings } = useMemo(() => {
@@ -62,7 +62,7 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
     if (state === "UPLOADED" || state === "UPLOADING") return;
 
     const { setWidgetUploadErrors, setWidgetUploadState } =
-      useDataStore.getState();
+      useUploadStore.getState();
 
     setWidgetUploadState(selectedWidgetKey, "UPLOADING");
 
@@ -107,7 +107,7 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
         (k) => k !== selectedWidgetKey,
       );
       if (next.length !== 0) {
-        useDataStore.setState({
+        useUploadStore.setState({
           selectedWidget: selectedWidgets.find(
             (w) => w.manifest.key === next[0],
           ),

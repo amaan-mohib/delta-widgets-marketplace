@@ -1,13 +1,11 @@
 "use client";
 
 import { IUploadManifest } from "@/lib/types/manifest";
-import { useDataStore } from "@/store/use-data-store";
 import {
   Field,
   Input,
   MessageBar,
   MessageBarBody,
-  tokens,
 } from "@fluentui/react-components";
 import debounce from "lodash.debounce";
 import { useCallback, useMemo } from "react";
@@ -15,6 +13,7 @@ import FormScreenshots from "./screenshots";
 import UploadFormSidebar from "./sidebar";
 import { IUploadState } from "@/store/store-actions";
 import SimpleEditorWrapper from "@/components/tiptap-templates/simple/simple-editor-wrapper";
+import { useUploadStore } from "@/store/use-upload-store";
 
 interface UploadFormProps {}
 
@@ -23,8 +22,8 @@ type IOnChange =
   | { name: "screenshots"; value: IUploadManifest["screenshots"] };
 
 const UploadForm: React.FC<UploadFormProps> = () => {
-  const selectedWidget = useDataStore((s) => s.selectedWidget);
-  const widgetUploads = useDataStore((s) => s.widgetUploads);
+  const selectedWidget = useUploadStore((s) => s.selectedWidget);
+  const widgetUploads = useUploadStore((s) => s.widgetUploads);
 
   const {
     values,
@@ -44,7 +43,7 @@ const UploadForm: React.FC<UploadFormProps> = () => {
   const onChange = useCallback(
     ({ name, value }: IOnChange) => {
       if (!selectedWidget) return;
-      useDataStore
+      useUploadStore
         .getState()
         .setWidgetUploadValues(selectedWidget.manifest.key, { [name]: value });
     },

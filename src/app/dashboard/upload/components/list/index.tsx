@@ -2,7 +2,7 @@
 
 import WidgetPreview from "@/components/widget-preview";
 import { IGetAllWidget } from "@/lib/commands";
-import { useDataStore } from "@/store/use-data-store";
+import { useUploadStore } from "@/store/use-upload-store";
 import {
   Body1Strong,
   Card,
@@ -20,8 +20,8 @@ interface UploadListProps {
 }
 
 const UploadList: React.FC<UploadListProps> = ({ widgets }) => {
-  const selectedWidgets = useDataStore((s) => s.selectedWidgets);
-  const widgetUploads = useDataStore((s) => s.widgetUploads);
+  const selectedWidgets = useUploadStore((s) => s.selectedWidgets);
+  const widgetUploads = useUploadStore((s) => s.widgetUploads);
 
   const selectedWidgetKeys = useMemo(
     () => selectedWidgets.map((i) => i.manifest.key),
@@ -30,9 +30,11 @@ const UploadList: React.FC<UploadListProps> = ({ widgets }) => {
 
   const onSelect = (widget: IGetAllWidget, checked: boolean) => {
     if (checked) {
-      useDataStore.setState({ selectedWidgets: [...selectedWidgets, widget] });
+      useUploadStore.setState({
+        selectedWidgets: [...selectedWidgets, widget],
+      });
     } else {
-      useDataStore.setState({
+      useUploadStore.setState({
         selectedWidgets: selectedWidgets.filter(
           (p) => p.manifest.key !== widget.manifest.key,
         ),

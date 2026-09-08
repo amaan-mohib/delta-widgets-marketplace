@@ -1,6 +1,6 @@
 "use client";
 
-import { useDataStore } from "@/store/use-data-store";
+import { useUploadStore } from "@/store/use-upload-store";
 import { Button, Spinner } from "@fluentui/react-components";
 import {
   ArrowLeftRegular,
@@ -12,9 +12,9 @@ import React, { useCallback } from "react";
 interface UploadFormSidebarProps {}
 
 const UploadFormSidebar: React.FC<UploadFormSidebarProps> = () => {
-  const selectedWidgets = useDataStore((s) => s.selectedWidgets);
-  const selectedWidget = useDataStore((s) => s.selectedWidget);
-  const widgetUploads = useDataStore((s) => s.widgetUploads);
+  const selectedWidgets = useUploadStore((s) => s.selectedWidgets);
+  const selectedWidget = useUploadStore((s) => s.selectedWidget);
+  const widgetUploads = useUploadStore((s) => s.widgetUploads);
 
   const getStateWidgetIcon = useCallback(
     (key: string) => {
@@ -34,7 +34,7 @@ const UploadFormSidebar: React.FC<UploadFormSidebarProps> = () => {
     <div className="border-r h-(--body-height) w-(--widget-list-sidebar) overflow-auto sticky top-(--header-height) left-0 p-2 pl-0">
       <Button
         onClick={() => {
-          useDataStore.setState({ uploadStep: "select" });
+          useUploadStore.setState({ uploadStep: "select" });
         }}
         icon={<ArrowLeftRegular />}
         appearance="subtle"
@@ -46,7 +46,7 @@ const UploadFormSidebar: React.FC<UploadFormSidebarProps> = () => {
         <Button
           key={item.manifest.key}
           onClick={() => {
-            useDataStore.setState({ selectedWidget: item });
+            useUploadStore.setState({ selectedWidget: item });
           }}
           icon={getStateWidgetIcon(item.manifest.key)}
           className="w-full"
