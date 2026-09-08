@@ -7,6 +7,15 @@ import { redirect } from "next/navigation";
 
 const PAGE_SIZE = 30;
 
+type WidgetType = Pick<
+  Widgets,
+  "id" | "key" | "download_count" | "widget_type" | "published_at"
+> &
+  Pick<WidgetVersions, "version" | "status" | "label"> & {
+    screenshot_src: string;
+    version_id: number;
+  };
+
 export const getUserWidgets = async (page: number, pageSize?: number) => {
   const user = await getAuthUser();
   if (!user) {
@@ -15,52 +24,42 @@ export const getUserWidgets = async (page: number, pageSize?: number) => {
 
   pageSize = pageSize || PAGE_SIZE;
 
-  const widgets: (Pick<
-    Widgets,
-    "id" | "key" | "label" | "download_count" | "widget_type" | "published_at"
-  > &
-    Pick<WidgetVersions, "version" | "status"> & {
-      screenshot_src: string;
-      version_id: number;
-    })[] = await models
-    .Widgets("w")
-    .select(
-      "w.id",
-      "w.key",
-      "w.label",
-      "w.download_count",
-      "w.widget_type",
-      "w.published_at",
-      "wv.id as version_id",
-      "wv.version",
-      "wv.status",
-      models
-        .Assets("a")
-        .join({ wva: Table.WidgetVersionAssets }, "a.id", "wva.asset_id")
-        .whereRaw("wva.widget_version_id = wv.id")
-        .where("a.asset_type", "SCREENSHOT")
-        .orderBy("wva.sort_order")
-        .limit(1)
-        .select("a.src")
-        .as("screenshot_src"),
-    )
-    .joinRaw(
-      `JOIN (
-          SELECT DISTINCT ON (widget_id) *
-          FROM ${Table.WidgetVersions}
-          ORDER BY widget_id, created_at DESC
-        ) wv ON w.id = wv.widget_id`,
-    )
-    .where("w.author_id", user.id)
-    .orderBy("w.created_at", "desc")
-    .limit(pageSize)
-    .offset((page - 1) * pageSize);
-
-  const total = await models
-    .Widgets()
-    .count("id")
-    .where("author_id", user.id)
-    .first();
+  const [widgets, total] = await Promise.all([
+    models
+      .Widgets("w")
+      .select(
+        "w.id",
+        "w.key",
+        "w.download_count",
+        "w.widget_type",
+        "w.published_at",
+        "wv.label",
+        "wv.id as version_id",
+        "wv.version",
+        "wv.status",
+        models
+          .Assets("a")
+          .join({ wva: Table.WidgetVersionAssets }, "a.id", "wva.asset_id")
+          .whereRaw("wva.widget_version_id = wv.id")
+          .where("a.asset_type", "SCREENSHOT")
+          .orderBy("wva.sort_order")
+          .limit(1)
+          .select("a.src")
+          .as("screenshot_src"),
+      )
+      .joinRaw(
+        `JOIN (
+            SELECT DISTINCT ON (widget_id) *
+            FROM ${Table.WidgetVersions}
+            ORDER BY widget_id, created_at DESC
+          ) wv ON w.id = wv.widget_id`,
+      )
+      .where("w.author_id", user.id)
+      .orderBy("w.created_at", "desc")
+      .limit(pageSize)
+      .offset((page - 1) * pageSize) as unknown as WidgetType[],
+    models.Widgets().count("id").where("author_id", user.id).first(),
+  ]);
 
   const likes = await models
     .WidgetLikes()

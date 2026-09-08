@@ -253,14 +253,14 @@ export type WidgetVersions = {
   updated_at: Date;
   published_at: Date | null;
   revision: number | null;
+  label: string;
+  description: string | null;
 };
 
 export type Widgets = {
   id: number;
   author_id: string;
   key: string;
-  label: string;
-  description: string | null;
   widget_type: string;
   download_count: string | null;
   created_at: Date;

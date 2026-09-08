@@ -52,21 +52,9 @@ const upsertWidget = async (
       .insert({
         key: widgetKey,
         author_id: user.id,
-        description: values.description,
-        label: values.label,
         widget_type: values.widget_type,
       })
       .returning("id")
-      .transacting(trx);
-  } else {
-    await models
-      .Widgets()
-      .update({
-        description: values.description,
-        label: values.label,
-        widget_type: values.widget_type,
-      })
-      .where({ id: widget.id })
       .transacting(trx);
   }
   return widget;
@@ -101,6 +89,8 @@ const upsertWidgetVersion = async (
         revision,
         version,
         changelog: values.changelog,
+        description: values.description,
+        label: values.label,
       })
       .returning("*")
       .transacting(trx);
@@ -109,6 +99,8 @@ const upsertWidgetVersion = async (
       .WidgetVersions()
       .update({
         changelog: values.changelog ?? "",
+        description: values.description,
+        label: values.label,
       })
       .where({ id: widgetVersion.id })
       .transacting(trx);
@@ -376,7 +368,7 @@ export const getExistingVersions = async (key: string) => {
   const widgetKey = `${user.profile.username}/${key}`;
   const widget = await models
     .Widgets()
-    .select("id", "label", "description")
+    .select("id")
     .where("key", widgetKey)
     .andWhere("author_id", user.id)
     .first();
@@ -386,7 +378,7 @@ export const getExistingVersions = async (key: string) => {
 
   const versions = await models
     .WidgetVersions()
-    .select("id", "revision", "version", "published_at")
+    .select("id", "revision", "version", "published_at", "label", "description")
     .where("widget_id", widget.id)
     .andWhere("status", "<>", "DRAFT")
     .orderBy("revision", "desc");

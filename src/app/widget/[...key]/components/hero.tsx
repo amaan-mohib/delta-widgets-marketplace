@@ -48,7 +48,7 @@ const Hero: React.FC<HeroProps> = ({
             </Badge>
           </div>
         )}
-        <Title1>{widget.label}</Title1>
+        <Title1>{version.label}</Title1>
         <Link href={`/user/${creator}`} className="w-fit">
           <Body1
             className="hover:underline"
@@ -101,7 +101,7 @@ const Hero: React.FC<HeroProps> = ({
             if (navigator.share) {
               try {
                 await navigator.share({
-                  title: `Check out ${widget.label} on Delta Widgets!`,
+                  title: `Check out ${version.label} on Delta Widgets!`,
                   url: window.location.href,
                 });
               } catch (err) {

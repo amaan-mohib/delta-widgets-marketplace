@@ -64,7 +64,7 @@ export const getWidgetScreenshots = async (
 export const initializeWidget = async (widget: IGetAllWidget) => {
   const [
     manifest,
-    { widget: existing, versions, screenshots: existingScreenshots },
+    { versions, screenshots: existingScreenshots },
     screenshots,
   ] = await Promise.all([
     getManifestFromPath(widget.manifestPath),
@@ -72,6 +72,7 @@ export const initializeWidget = async (widget: IGetAllWidget) => {
     getWidgetScreenshots(widget),
   ]);
   const widgetType = widget.manifest.widgetType;
+  const existing = versions[0];
   const values: IUploadManifest = {
     key: widget.manifest.key,
     label: existing?.label || widget.manifest.label,
