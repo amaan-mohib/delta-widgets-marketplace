@@ -6,12 +6,14 @@ import {
   Body1,
   Button,
   Divider,
+  Select,
   Text,
   Title1,
   tokens,
+  Tooltip,
 } from "@fluentui/react-components";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ArrowDownloadRegular,
   HeartFilled,
@@ -19,6 +21,10 @@ import {
   ShareRegular,
 } from "@fluentui/react-icons";
 import { getStatusText } from "@/lib/utils";
+import { useAuth } from "@/store/use-auth";
+import { useDataStore } from "@/store/use-data-store";
+import { getIfUserLiked, likeAction } from "../actions";
+import { usePathname, useRouter } from "next/navigation";
 
 interface HeroProps {
   widget: Widgets;
@@ -26,6 +32,7 @@ interface HeroProps {
   likes: number;
   isAuthor: boolean;
   version: Partial<WidgetVersions>;
+  versions: string[];
 }
 
 const Hero: React.FC<HeroProps> = ({
@@ -34,22 +41,71 @@ const Hero: React.FC<HeroProps> = ({
   likes,
   isAuthor,
   version,
+  versions,
 }) => {
   const [liked, setLiked] = useState(false);
   const [likesNum, setLikesNum] = useState(likes);
+  const { user } = useAuth();
+  const clientId = useDataStore((s) => s.clientId);
+  const [visibleTooltip, setVisibleTooltip] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!user && !clientId) return;
+
+    getIfUserLiked({
+      widget_id: widget.id,
+      user_id: user?.id,
+      anon_id: clientId,
+    }).then((liked) => {
+      setLiked(liked);
+    });
+  }, [user, clientId]);
+
+  const onLike = async () => {
+    if (!user && !clientId) return;
+
+    setLiked((prev) => !prev);
+    setLikesNum((prev) => prev + (liked ? -1 : 1));
+
+    await likeAction({
+      liked,
+      widget_id: widget.id,
+      anon_id: clientId,
+      user_id: user?.id,
+    });
+  };
 
   return (
     <section className="mt-5">
       <div className="flex flex-col">
         {isAuthor && version.status && (
-          <div className="mb-3">
+          <div className="flex items-center mb-3 gap-2">
             <Badge size="large">
               {getStatusText(version.status)} - {version.version}
             </Badge>
+            <div>
+              <Divider vertical />
+            </div>
+            <label htmlFor={"versions"}>Versions: </label>
+            <Select
+              id="versions"
+              defaultValue={version.version}
+              size="small"
+              onChange={(_, { value }) => {
+                router.push(pathname + `?version=${value}`);
+              }}>
+              {versions.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
           </div>
         )}
         <Title1>{version.label}</Title1>
-        <Link href={`/user/${creator}`} className="w-fit">
+        <Link href={`/creator/${creator}`} className="w-fit">
           <Body1
             className="hover:underline"
             style={{
@@ -72,27 +128,25 @@ const Hero: React.FC<HeroProps> = ({
             </>
           )}
         </Button>
-        <Button
-          appearance="subtle"
-          size="large"
-          icon={liked ? <HeartFilled /> : <HeartRegular />}
-          onClick={() => {
-            if (liked) {
-              setLiked(false);
-              setLikesNum((prev) => prev - 1);
-            } else {
-              setLiked(true);
-              setLikesNum((prev) => prev + 1);
-            }
-          }}>
-          <span>Like</span>
-          {likesNum > 0 && (
-            <>
-              <Divider vertical className="mx-2" />
-              <span>{likesNum || "0"}</span>
-            </>
-          )}
-        </Button>
+        <Tooltip
+          content={"Login or use the app to like"}
+          relationship="description"
+          visible={visibleTooltip && !user && !clientId}
+          onVisibleChange={(_, data) => setVisibleTooltip(data.visible)}>
+          <Button
+            appearance="subtle"
+            size="large"
+            icon={liked ? <HeartFilled /> : <HeartRegular />}
+            onClick={onLike}>
+            <span>Like</span>
+            {likesNum > 0 && (
+              <>
+                <Divider vertical className="mx-2" />
+                <span>{likesNum || "0"}</span>
+              </>
+            )}
+          </Button>
+        </Tooltip>
         <Button
           appearance="subtle"
           size="large"

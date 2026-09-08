@@ -266,5 +266,6 @@ export type Widgets = {
   created_at: Date;
   updated_at: Date;
   published_at: Date | null;
+  likes: string | null;
 };
 

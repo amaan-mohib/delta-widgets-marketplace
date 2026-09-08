@@ -9,7 +9,7 @@ const PAGE_SIZE = 30;
 
 type WidgetType = Pick<
   Widgets,
-  "id" | "key" | "download_count" | "widget_type" | "published_at"
+  "id" | "key" | "download_count" | "widget_type" | "published_at" | "likes"
 > &
   Pick<WidgetVersions, "version" | "status" | "label"> & {
     screenshot_src: string;
@@ -32,6 +32,7 @@ export const getUserWidgets = async (page: number, pageSize?: number) => {
         "w.key",
         "w.download_count",
         "w.widget_type",
+        "w.likes",
         "w.published_at",
         "wv.label",
         "wv.id as version_id",
@@ -61,15 +62,5 @@ export const getUserWidgets = async (page: number, pageSize?: number) => {
     models.Widgets().count("id").where("author_id", user.id).first(),
   ]);
 
-  const likes = await models
-    .WidgetLikes()
-    .select("widget_id")
-    .count("widget_id")
-    .whereIn(
-      "widget_id",
-      widgets.map((w) => w.id),
-    )
-    .groupBy("widget_id");
-
-  return { widgets, total: Number(total?.count ?? 0), likes };
+  return { widgets, total: Number(total?.count ?? 0) };
 };

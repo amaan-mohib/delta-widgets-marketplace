@@ -16,9 +16,9 @@ const PAGE_SIZE = 30;
 
 const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
   const { profile } = useAuth();
-  const [{ widgets, total, likes }, setWidgets] = useState<
+  const [{ widgets, total }, setWidgets] = useState<
     Awaited<ReturnType<typeof getUserWidgets>>
-  >({ widgets: [], total: 0, likes: [] });
+  >({ widgets: [], total: 0 });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -38,14 +38,6 @@ const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
     getWidgets();
   }, [page]);
 
-  const likesById = useMemo(() => {
-    const res: Record<number, number> = {};
-    likes.forEach(({ widget_id, count }) => {
-      res[widget_id] = Number(count ?? 0);
-    });
-    return res;
-  }, [likes]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-5">
@@ -64,8 +56,8 @@ const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
             key={widget.id}
             widget={{
               ...widget,
+              likes: Number(widget.likes ?? 0),
               creator: profile?.username!,
-              likes: likesById[widget.id],
             }}
             showStatus
           />
