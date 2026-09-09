@@ -8,12 +8,14 @@ import {
   MessageBarBody,
 } from "@fluentui/react-components";
 import debounce from "lodash.debounce";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import FormScreenshots from "./screenshots";
 import UploadFormSidebar from "./sidebar";
 import { IUploadState } from "@/store/store-actions";
 import SimpleEditorWrapper from "@/components/tiptap-templates/simple/simple-editor-wrapper";
 import { useUploadStore } from "@/store/use-upload-store";
+import { getAvailableTags } from "../../actions";
+import FormTags from "./tags";
 
 interface UploadFormProps {}
 
@@ -24,6 +26,7 @@ type IOnChange =
 const UploadForm: React.FC<UploadFormProps> = () => {
   const selectedWidget = useUploadStore((s) => s.selectedWidget);
   const widgetUploads = useUploadStore((s) => s.widgetUploads);
+  const availableTags = useUploadStore((s) => s.availableTags);
 
   const {
     values,
@@ -39,6 +42,15 @@ const UploadForm: React.FC<UploadFormProps> = () => {
   );
 
   const disabled = state === "UPLOADED" || state === "UPLOADING";
+
+  useEffect(() => {
+    if (availableTags.length > 0) return;
+
+    getAvailableTags().then((tags) => {
+      const availableTags = tags.map((t) => t.slug);
+      useUploadStore.setState({ availableTags });
+    });
+  }, []);
 
   const onChange = useCallback(
     ({ name, value }: IOnChange) => {
@@ -154,6 +166,17 @@ const UploadForm: React.FC<UploadFormProps> = () => {
               )}
             </Field>
           )}
+          <Field
+            label={`Tags (${values.tags?.length ?? 0}/10)`}
+            required
+            validationMessage={errorByLabel.tags}
+            validationState={errorByLabel.tags ? "error" : "none"}>
+            {(props) => (
+              <div {...props}>
+                <FormTags selectedTags={values.tags ?? []} />
+              </div>
+            )}
+          </Field>
           <Field
             label="Screenshots"
             required

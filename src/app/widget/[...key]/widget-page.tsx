@@ -21,8 +21,15 @@ const WidgetPage = async (props: PageProps<"/widget/[...key]">) => {
   if (!data) {
     notFound();
   }
-  const { widget, isWidgetAuthor, assets, selectedVersion, creator, versions } =
-    data;
+  const {
+    widget,
+    isWidgetAuthor,
+    assets,
+    selectedVersion,
+    creator,
+    versions,
+    tags,
+  } = data;
 
   return (
     <div className="py-5">
@@ -36,6 +43,7 @@ const WidgetPage = async (props: PageProps<"/widget/[...key]">) => {
         likes={Number(widget.likes ?? 0)}
         version={selectedVersion}
         versions={versions}
+        tags={tags}
       />
       <Description description={selectedVersion.description || ""} />
       {selectedVersion.changelog && (

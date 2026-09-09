@@ -71,4 +71,5 @@ export interface IUploadManifest {
     fileSize?: number;
     assetId?: number;
   }[];
+  tags?: string[];
 }

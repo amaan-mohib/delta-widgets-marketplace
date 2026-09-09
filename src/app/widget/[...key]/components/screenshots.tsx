@@ -8,7 +8,6 @@ import {
   CarouselNav,
   CarouselNavButton,
   CarouselNavContainer,
-  CarouselNavImageButton,
   CarouselSlider,
   CarouselViewport,
   Image,
@@ -29,7 +28,7 @@ const useClasses = makeStyles({
   },
   image: {
     width: "100%",
-    maxHeight: "400px",
+    maxHeight: "clamp(200px, 50vh, 400px)",
     objectFit: "scale-down",
   },
 });

@@ -23,6 +23,7 @@ export enum Table {
   WidgetCategories = "widget_categories",
   WidgetLikes = "widget_likes",
   WidgetVersionAssets = "widget_version_assets",
+  WidgetVersionCategories = "widget_version_categories",
   WidgetVersions = "widget_versions",
   Widgets = "widgets",
 }
@@ -49,6 +50,7 @@ export type Tables = {
   "widget_categories": WidgetCategories,
   "widget_likes": WidgetLikes,
   "widget_version_assets": WidgetVersionAssets,
+  "widget_version_categories": WidgetVersionCategories,
   "widget_versions": WidgetVersions,
   "widgets": Widgets,
 };
@@ -171,9 +173,9 @@ export type Categories = {
   id: number;
   slug: string;
   name: string;
-  description: string | null;
   created_at: Date;
   updated_at: Date;
+  count: string | null;
 };
 
 export type KnexMigrations = {
@@ -241,6 +243,11 @@ export type WidgetVersionAssets = {
   widget_version_id: number;
   asset_id: number;
   sort_order: number;
+};
+
+export type WidgetVersionCategories = {
+  widget_version_id: number;
+  category_id: number;
 };
 
 export type WidgetVersions = {

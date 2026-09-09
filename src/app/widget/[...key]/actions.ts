@@ -51,6 +51,33 @@ export const getWidget = async ({
     .where("w.widget_version_id", selectedVersion.id)
     .orderBy("w.sort_order");
 
+  let tags: string[] = [];
+  if (isWidgetAuthor && !approvedVersion) {
+    const tagSlugs = await models
+      .Categories()
+      .select("slug")
+      .whereIn(
+        "id",
+        models
+          .WidgetVersionCategories()
+          .select("category_id")
+          .where("widget_version_id", selectedVersion.id),
+      );
+    tags = tagSlugs.map((t) => t.slug);
+  } else {
+    const tagSlugs = await models
+      .Categories()
+      .select("slug")
+      .whereIn(
+        "id",
+        models
+          .WidgetCategories()
+          .select("category_id")
+          .where("widget_id", widget.id),
+      );
+    tags = tagSlugs.map((t) => t.slug);
+  }
+
   return {
     widget,
     versions: versions.map((v) => v.version),
@@ -58,6 +85,7 @@ export const getWidget = async ({
     isWidgetAuthor,
     creator: authorProfile.username,
     selectedVersion,
+    tags,
   };
 };
 

@@ -22,6 +22,7 @@ import {
 	WidgetCategories,
 	WidgetLikes,
 	WidgetVersionAssets,
+	WidgetVersionCategories,
 	WidgetVersions,
 	Widgets
 } from "./types";
@@ -48,6 +49,7 @@ const models = {
 	WidgetCategories: (alias?: string) => db<WidgetCategories>(alias ? { [alias]: Table.WidgetCategories } : Table.WidgetCategories),
 	WidgetLikes: (alias?: string) => db<WidgetLikes>(alias ? { [alias]: Table.WidgetLikes } : Table.WidgetLikes),
 	WidgetVersionAssets: (alias?: string) => db<WidgetVersionAssets>(alias ? { [alias]: Table.WidgetVersionAssets } : Table.WidgetVersionAssets),
+	WidgetVersionCategories: (alias?: string) => db<WidgetVersionCategories>(alias ? { [alias]: Table.WidgetVersionCategories } : Table.WidgetVersionCategories),
 	WidgetVersions: (alias?: string) => db<WidgetVersions>(alias ? { [alias]: Table.WidgetVersions } : Table.WidgetVersions),
 	Widgets: (alias?: string) => db<Widgets>(alias ? { [alias]: Table.Widgets } : Table.Widgets)
 }

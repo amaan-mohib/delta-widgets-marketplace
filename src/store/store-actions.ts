@@ -64,7 +64,7 @@ export const getWidgetScreenshots = async (
 export const initializeWidget = async (widget: IGetAllWidget) => {
   const [
     manifest,
-    { versions, screenshots: existingScreenshots },
+    { versions = [], screenshots: existingScreenshots = [], tags = [] },
     screenshots,
   ] = await Promise.all([
     getManifestFromPath(widget.manifestPath),
@@ -89,6 +89,7 @@ export const initializeWidget = async (widget: IGetAllWidget) => {
       })),
     ],
     changelog: versions.length > 0 ? "" : undefined,
+    tags: tags.length > 0 ? tags.map((t) => t.slug) : [],
   };
   const response: IUploadState = {
     state: "DRAFT",

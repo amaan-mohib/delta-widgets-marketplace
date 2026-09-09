@@ -33,6 +33,7 @@ interface HeroProps {
   isAuthor: boolean;
   version: Partial<WidgetVersions>;
   versions: string[];
+  tags: string[];
 }
 
 const Hero: React.FC<HeroProps> = ({
@@ -42,6 +43,7 @@ const Hero: React.FC<HeroProps> = ({
   isAuthor,
   version,
   versions,
+  tags,
 }) => {
   const [liked, setLiked] = useState(false);
   const [likesNum, setLikesNum] = useState(likes);
@@ -138,7 +140,7 @@ const Hero: React.FC<HeroProps> = ({
             size="large"
             icon={liked ? <HeartFilled /> : <HeartRegular />}
             onClick={onLike}>
-            <span>Like</span>
+            <span>{liked ? "Liked" : "Like"}</span>
             {likesNum > 0 && (
               <>
                 <Divider vertical className="mx-2" />
@@ -166,6 +168,20 @@ const Hero: React.FC<HeroProps> = ({
           Share
         </Button>
       </div>
+      {tags.length > 0 && (
+        <div className="flex items-center flex-wrap gap-2 mt-5">
+          {tags.map((tag) => (
+            <Button
+              key={tag}
+              as="a"
+              href={`/tag/${tag}`}
+              size="small"
+              shape="circular">
+              #{tag}
+            </Button>
+          ))}
+        </div>
+      )}
     </section>
   );
 };

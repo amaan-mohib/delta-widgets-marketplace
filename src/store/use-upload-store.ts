@@ -12,6 +12,7 @@ interface IUploadStore {
   uploadStep: "select" | "form" | null;
   selectedWidget: IGetAllWidget | null;
   widgetUploads: Record<string, IUploadState>;
+  availableTags: string[];
   initializeWidgetUpload: (widgets: IGetAllWidget[]) => Promise<void>;
   setWidgetUploadState: (key: string, state: IUploadState["state"]) => void;
   setWidgetUploadValues: (
@@ -26,6 +27,7 @@ export const useUploadStore = create<IUploadStore>((set, get) => ({
   uploadStep: null,
   selectedWidget: null,
   widgetUploads: {},
+  availableTags: [],
   async initializeWidgetUpload(widgets) {
     const uploads = get().widgetUploads;
     let hasChange = false;

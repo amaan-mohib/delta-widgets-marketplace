@@ -1,6 +1,6 @@
 "use server";
 
-import db, { Assets, Table } from "@/lib/db";
+import db, { Assets, Categories, Table } from "@/lib/db";
 import models from "@/lib/db/models";
 import { S3, S3_BUCKET } from "@/lib/storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -214,6 +214,57 @@ export const createUploadJobs = async (
   return uploadJobs;
 };
 
+function normalizeTag(tag: string) {
+  return tag
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export const upsertTags = async (
+  tags: string[],
+  widgetVersionId: number,
+  trx: Knex.Transaction,
+) => {
+  await models
+    .WidgetVersionCategories()
+    .del()
+    .where("widget_version_id", widgetVersionId)
+    .transacting(trx);
+  if (tags.length === 0) return;
+
+  tags = tags.map(normalizeTag);
+  await models
+    .Categories()
+    .insert(
+      tags.map((t) => ({
+        name: t,
+        slug: t,
+      })),
+    )
+    .onConflict("slug")
+    .ignore()
+    .transacting(trx);
+  const categories = await models
+    .Categories()
+    .select("id")
+    .whereIn("slug", tags)
+    .transacting(trx);
+  await models
+    .WidgetVersionCategories()
+    .insert(
+      categories.map((c) => ({
+        category_id: c.id,
+        widget_version_id: widgetVersionId,
+      })),
+    )
+    .transacting(trx);
+};
+
 export const startUpload = async (
   values: IUploadManifest,
   manifest: Pick<IWidget, "path" | "file" | "widgetType" | "customAssets">,
@@ -233,6 +284,7 @@ export const startUpload = async (
     const widget = await upsertWidget(values, user, widgetKey, trx);
     const widgetVersion = await upsertWidgetVersion(values, widget.id, trx);
     const uploadJob = await upsertUploadJob(user, widgetVersion.id, trx);
+    await upsertTags(values.tags ?? [], widgetVersion.id, trx);
 
     const uploadJobs = await createUploadJobs(
       widgetKey,
@@ -373,7 +425,7 @@ export const getExistingVersions = async (key: string) => {
     .andWhere("author_id", user.id)
     .first();
   if (!widget) {
-    return { widget: null, versions: [], screenshots: [] };
+    return {};
   }
 
   const versions = await models
@@ -384,6 +436,7 @@ export const getExistingVersions = async (key: string) => {
     .orderBy("revision", "desc");
 
   let screenshots: Pick<Assets, "id" | "src" | "file_name" | "size">[] = [];
+  let tags: Pick<Categories, "id" | "slug">[] = [];
   if (versions.length > 0) {
     screenshots = await models
       .Assets("a")
@@ -394,6 +447,25 @@ export const getExistingVersions = async (key: string) => {
       .andWhereNot("a.src", "like", "%icon.png")
       .andWhereNot("a.src", "like", "%thumb.png")
       .orderBy("w.sort_order");
+
+    tags = await models
+      .Categories()
+      .select("id", "slug")
+      .whereIn(
+        "id",
+        models
+          .WidgetVersionCategories()
+          .select("category_id")
+          .where("widget_version_id", versions[0].id),
+      );
   }
-  return { widget, versions, screenshots };
+  return { widget, versions, screenshots, tags };
+};
+
+export const getAvailableTags = async () => {
+  return await models
+    .Categories()
+    .select("id", "slug")
+    .limit(20)
+    .orderBy("count", "desc");
 };

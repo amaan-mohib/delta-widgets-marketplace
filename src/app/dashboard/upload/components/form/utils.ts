@@ -12,7 +12,14 @@ export const validateForm = async (
   assetPath?: string,
 ) => {
   const errors: IFormError[] = [];
-  let { label, description, changelog, widget_type, screenshots = [] } = values;
+  let {
+    label,
+    description,
+    changelog,
+    widget_type,
+    screenshots = [],
+    tags = [],
+  } = values;
   label = label.trim();
   if (!label) {
     errors.push({
@@ -64,6 +71,13 @@ export const validateForm = async (
     errors.push({
       key: "screenshots",
       message: "Add atleast one screenshot",
+    });
+  }
+
+  if (tags.length === 0) {
+    errors.push({
+      key: "tags",
+      message: "Pick atleast one tag",
     });
   }
 
