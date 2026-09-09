@@ -1,6 +1,7 @@
 "use server";
 import { auth } from "@/lib/auth/server";
 import models from "@/lib/db/models";
+import { connection } from "next/server";
 
 export const test = async () => {
   const templates = [
@@ -73,18 +74,23 @@ export const handleOAuthSignInServer = async (
 };
 
 export async function getAuthUser() {
-  const { data: session } = await auth.getSession();
+  try {
+    await connection();
+    const { data: session } = await auth.getSession();
 
-  if (!session?.user) return null;
+    if (!session?.user) return null;
 
-  const user = session.user;
-  const profile = await models
-    .UserProfiles()
-    .select("username", "created_at")
-    .where("user_id", user.id)
-    .first();
-  return {
-    ...user,
-    profile,
-  };
+    const user = session.user;
+    const profile = await models
+      .UserProfiles()
+      .select("username", "created_at")
+      .where("user_id", user.id)
+      .first();
+    return {
+      ...user,
+      profile,
+    };
+  } catch (error) {
+    return null;
+  }
 }

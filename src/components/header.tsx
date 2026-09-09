@@ -30,9 +30,17 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
   const headerAction = useMemo(() => {
     return (
       <>
-        {user && (
-          <Button as="a" appearance="subtle" href="/dashboard">
+        {user ? (
+          <Button as="a" href="/dashboard">
             Dashboard
+          </Button>
+        ) : (
+          <Button
+            as="a"
+            appearance="subtle"
+            href="/login"
+            style={{ minWidth: "fit-content" }}>
+            Login
           </Button>
         )}
         {isInApp ? (
@@ -105,14 +113,6 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              as="a"
-              target="_blank"
-              href="https://docs.deltawidgets.com/"
-              appearance="subtle"
-              style={{ minWidth: "fit-content" }}>
-              Docs
-            </Button>
             {!isDashboard && (
               <Button
                 as="a"
@@ -123,6 +123,14 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
                 rel="noopener noreferrer"
               />
             )}
+            <Button
+              as="a"
+              target="_blank"
+              href="https://docs.deltawidgets.com/"
+              appearance="subtle"
+              style={{ minWidth: "fit-content" }}>
+              Docs
+            </Button>
             {headerAction}
           </div>
         </div>

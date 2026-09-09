@@ -1,12 +1,13 @@
 import LoginPage from "@/components/login";
 import RootLayout from "@/components/root-layout";
+import { Suspense } from "react";
 
-export const instant = false;
-
-const Login = () => {
+const Login = async () => {
   return (
     <RootLayout>
-      <LoginPage />
+      <Suspense>
+        <LoginPage />
+      </Suspense>
     </RootLayout>
   );
 };
