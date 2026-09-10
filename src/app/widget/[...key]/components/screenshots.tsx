@@ -14,6 +14,7 @@ import {
   makeStyles,
   tokens,
 } from "@fluentui/react-components";
+import { useEffect, useState } from "react";
 
 const useClasses = makeStyles({
   viewport: {
@@ -25,6 +26,9 @@ const useClasses = makeStyles({
     boxSizing: "border-box",
     width: "100%",
     overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   image: {
     width: "100%",
@@ -33,11 +37,18 @@ const useClasses = makeStyles({
   },
 });
 
-const ImageCard: React.FC<{ url: string }> = (props) => {
+const ImageCard: React.FC<{ url: string; hidden?: boolean }> = (props) => {
   const classes = useClasses();
   const { url } = props;
 
-  return <Image className={classes.image} src={url} role="presentation" />;
+  return (
+    <Image
+      className={classes.image}
+      src={url}
+      role="presentation"
+      style={props.hidden ? { display: "none" } : {}}
+    />
+  );
 };
 
 const getAnnouncement: CarouselAnnouncerFunction = (
@@ -52,7 +63,32 @@ interface ScreenshotsProps {
 }
 
 const Screenshots: React.FC<ScreenshotsProps> = ({ screenshots }) => {
+  const [init, setInit] = useState(true);
   const classes = useClasses();
+
+  useEffect(() => {
+    setInit(false);
+  }, []);
+
+  if (init) {
+    return (
+      <div
+        className="flex items-center gap-2 overflow-x-auto justify-center"
+        style={{
+          background: tokens.colorNeutralBackgroundAlpha,
+          padding: "10px",
+          borderRadius: "4px",
+        }}>
+        {screenshots.map((image, index) => (
+          <ImageCard
+            key={image.src}
+            url={process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + image.src}
+            hidden={index !== 0}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <Carousel groupSize={1} align="center" announcement={getAnnouncement}>

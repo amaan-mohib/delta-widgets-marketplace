@@ -1,17 +1,25 @@
 "use server";
 
-import { Table } from "@/lib/db";
+import { getAuthUser } from "@/app/actions";
+import db, { Table } from "@/lib/db";
 import models from "@/lib/db/models";
+import { cacheLife, cacheTag, updateTag } from "next/cache";
 
 export const getWidget = async ({
   widgetKey,
   userId,
   versionParam,
+  isAdmin,
 }: {
   widgetKey: string;
   userId?: string;
   versionParam?: string;
+  isAdmin?: boolean;
 }) => {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(`widget-${widgetKey}${versionParam ? "" : `-${versionParam}`}`);
+
   const widget = await models.Widgets().where("key", widgetKey).first();
   if (!widget) {
     return null;
@@ -29,7 +37,8 @@ export const getWidget = async ({
     .where("widget_id", widget.id)
     .orderBy("revision", "desc");
   const approvedVersion = versions.find((v) => v.status === "PUBLISHED");
-  const isWidgetAuthor = userId ? userId === widget.author_id : false;
+  const isWidgetAuthor =
+    isAdmin || (userId ? userId === widget.author_id : false);
   const latestVersion = isWidgetAuthor ? versions[0] : approvedVersion;
 
   if ((!approvedVersion && !isWidgetAuthor) || !latestVersion) {
@@ -51,32 +60,17 @@ export const getWidget = async ({
     .where("w.widget_version_id", selectedVersion.id)
     .orderBy("w.sort_order");
 
-  let tags: string[] = [];
-  if (isWidgetAuthor && !approvedVersion) {
-    const tagSlugs = await models
-      .Categories()
-      .select("slug")
-      .whereIn(
-        "id",
-        models
-          .WidgetVersionCategories()
-          .select("category_id")
-          .where("widget_version_id", selectedVersion.id),
-      );
-    tags = tagSlugs.map((t) => t.slug);
-  } else {
-    const tagSlugs = await models
-      .Categories()
-      .select("slug")
-      .whereIn(
-        "id",
-        models
-          .WidgetCategories()
-          .select("category_id")
-          .where("widget_id", widget.id),
-      );
-    tags = tagSlugs.map((t) => t.slug);
-  }
+  const tagSlugs = await models
+    .Categories()
+    .select("slug")
+    .whereIn(
+      "id",
+      models
+        .WidgetVersionCategories()
+        .select("category_id")
+        .where("widget_version_id", selectedVersion.id),
+    );
+  const tags = tagSlugs.map((t) => t.slug);
 
   return {
     widget,
@@ -145,5 +139,111 @@ export const likeAction = async ({
         }),
       models.Widgets().decrement("likes", 1).where("id", widget_id),
     ]);
+  }
+};
+
+export const getAuditHistory = async (widget_version_id: number) => {
+  return await models
+    .WidgetAudits()
+    .select("id", "action", "notes", "widget_version_id", "created_at")
+    .where("widget_version_id", widget_version_id)
+    .orderBy("created_at", "desc");
+};
+
+export const auditAction = async (
+  action: string,
+  notes: string,
+  widgetVersionId: number,
+  widgetKey: string,
+) => {
+  const user = await getAuthUser();
+  if (!user || user.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+
+  const widgetVersion = await models
+    .WidgetVersions()
+    .where("id", widgetVersionId)
+    .first();
+  if (!widgetVersion) {
+    throw new Error("No widget version found");
+  }
+
+  const trx = await db.transaction();
+  try {
+    await models
+      .WidgetAudits()
+      .insert({
+        action,
+        notes: notes || null,
+        auditor_id: user.id,
+        widget_version_id: widgetVersion.id,
+      })
+      .transacting(trx);
+    if (action !== "COMMENT") {
+      await models
+        .WidgetVersions()
+        .update({
+          status: action === "REQUESTED_CHANGE" ? "IN_REVIEW" : action,
+          published_at: action === "PUBLISHED" ? trx.fn.now() : null,
+        })
+        .where("id", widgetVersion.id)
+        .transacting(trx);
+
+      const olderVersions = await models
+        .WidgetVersions()
+        .where("widget_id", widgetVersion.widget_id)
+        .andWhere("revision", "<", widgetVersion.revision)
+        .transacting(trx);
+      await models
+        .WidgetVersions()
+        .update({ status: "SUSPENDED", published_at: null })
+        .whereIn(
+          "id",
+          olderVersions.map((i) => i.id),
+        )
+        .transacting(trx);
+      await models
+        .WidgetAudits()
+        .insert(
+          olderVersions.map((v) => ({
+            action: "SUSPENDED",
+            notes: `Suspended because a new version was ${action.toLowerCase().replace(/_/g, " ")}`,
+            auditor_id: user.id,
+            widget_version_id: v.id,
+          })),
+        )
+        .transacting(trx);
+
+      await trx.raw(
+        `
+        UPDATE ${Table.Categories} c
+        SET count = (
+          SELECT COUNT(DISTINCT wv.widget_id)
+          FROM widget_version_categories wvc
+          JOIN widget_versions wv
+            ON wv.id = wvc.widget_version_id
+          WHERE wvc.category_id = c.id
+            AND wv.status = 'PUBLISHED'
+        )
+        WHERE c.id IN (
+          SELECT category_id
+          FROM ${Table.WidgetVersionCategories}
+          WHERE widget_version_id IN (${[...olderVersions, widgetVersion].map(() => "?").join(",")})
+        )`,
+        [...olderVersions.map((i) => i.id), widgetVersion.id],
+      );
+      updateTag(`widget-${widgetKey}`);
+      updateTag(`widget-${widgetKey}-${widgetVersion.version}`);
+      olderVersions.forEach((v) => {
+        updateTag(`widget-${widgetKey}-${v.version}`);
+      });
+    }
+    // TODO: send emails
+    await trx.commit();
+  } catch (error) {
+    await trx.rollback();
+    console.error(error);
+    throw new Error("Something went wrong while adding audit");
   }
 };

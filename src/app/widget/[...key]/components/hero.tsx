@@ -119,6 +119,7 @@ const Hero: React.FC<HeroProps> = ({
       </div>
       <div className="flex items-center gap-2 mt-5">
         <Button
+          disabled={version.status !== "PUBLISHED"}
           appearance="primary"
           size="large"
           icon={<ArrowDownloadRegular />}>
@@ -138,6 +139,7 @@ const Hero: React.FC<HeroProps> = ({
           <Button
             appearance="subtle"
             size="large"
+            disabled={version.status !== "PUBLISHED"}
             icon={liked ? <HeartFilled /> : <HeartRegular />}
             onClick={onLike}>
             <span>{liked ? "Liked" : "Like"}</span>
@@ -152,6 +154,7 @@ const Hero: React.FC<HeroProps> = ({
         <Button
           appearance="subtle"
           size="large"
+          disabled={version.status !== "PUBLISHED"}
           icon={<ShareRegular />}
           onClick={async () => {
             if (navigator.share) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
+import { Editor, EditorContent, EditorContext, useEditor } from "@tiptap/react";
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
@@ -208,12 +208,14 @@ interface IEditor {
   setContent?: (value: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  setEditor?: (editor: Editor | null) => void;
 }
 export function SimpleEditor({
   content,
   setContent,
   disabled,
   placeholder,
+  setEditor,
 }: IEditor) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
@@ -277,6 +279,12 @@ export function SimpleEditor({
   useEffect(() => {
     editor?.setEditable(!disabled);
   }, [editor, disabled]);
+
+  useEffect(() => {
+    if (setEditor) {
+      setEditor(editor);
+    }
+  }, [editor]);
 
   const rect = useCursorVisibility({
     editor,

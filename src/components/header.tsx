@@ -8,6 +8,7 @@ import {
   MenuList,
   MenuPopover,
   MenuTrigger,
+  Spinner,
   tokens,
 } from "@fluentui/react-components";
 import Link from "next/link";
@@ -24,13 +25,15 @@ interface HeaderProps {
 }
 
 export function Header({ isDashboard, isUpload }: HeaderProps) {
-  const { user } = useAuth();
+  const { user, loading: userLoading } = useAuth();
   const isInApp = useDataStore((state) => state.isInApp);
 
   const headerAction = useMemo(() => {
     return (
       <>
-        {user ? (
+        {userLoading ? (
+          <Spinner size="tiny" />
+        ) : user ? (
           <Button as="a" href="/dashboard">
             Dashboard
           </Button>
@@ -78,6 +81,9 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
               </MenuTrigger>
               <MenuPopover>
                 <MenuList>
+                  {user.role === "admin" && (
+                    <MenuItemLink href="/dashboard/admin">Admin</MenuItemLink>
+                  )}
                   <MenuItemLink href="/dashboard/profile">Profile</MenuItemLink>
                   <MenuItemLink href="/logout">Log out</MenuItemLink>
                 </MenuList>
@@ -87,7 +93,7 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
         )}
       </>
     );
-  }, [isInApp, user]);
+  }, [isInApp, user, userLoading]);
 
   return (
     <header

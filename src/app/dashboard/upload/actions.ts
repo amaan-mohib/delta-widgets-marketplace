@@ -1,6 +1,12 @@
 "use server";
 
-import db, { Assets, Categories, Table } from "@/lib/db";
+import db, {
+  Assets,
+  Categories,
+  Table,
+  UploadJobs,
+  WidgetVersions,
+} from "@/lib/db";
 import models from "@/lib/db/models";
 import { S3, S3_BUCKET } from "@/lib/storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -314,7 +320,13 @@ export const startUpload = async (
 export const finalizeUpload = async (jobId: number) => {
   const trx = await db.transaction();
   try {
-    const job = await models.UploadJobs().where("id", jobId).first();
+    const job: (UploadJobs & Pick<WidgetVersions, "revision">) | undefined =
+      await models
+        .UploadJobs("j")
+        .select("j.*", "w.revision")
+        .where("j.id", jobId)
+        .join({ w: Table.WidgetVersions }, "j.widget_version_id", "w.id")
+        .first();
     if (!job) {
       throw new Error("No job found");
     }
@@ -395,6 +407,13 @@ export const finalizeUpload = async (jobId: number) => {
         .UploadJobFiles()
         .where("job_id", jobId)
         .update({ status: "COMPLETED" })
+        .transacting(trx),
+      models
+        .WidgetAudits()
+        .insert({
+          widget_version_id: widgetVersionId,
+          action: job.revision === 1 ? "SUBMITTED" : "UPDATED",
+        })
         .transacting(trx),
     ]);
 

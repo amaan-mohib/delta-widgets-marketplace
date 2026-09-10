@@ -1,17 +1,19 @@
 import React, { CSSProperties } from "react";
 import { SimpleEditor } from "./simple-editor";
 import { FieldControlProps, tokens } from "@fluentui/react-components";
+import { Editor } from "@tiptap/core";
 
 interface SimpleEditorWrapperProps {
   controlProps?: FieldControlProps;
   error?: string;
-  editorKey: any;
-  content: string;
-  setContent: (value: string) => void;
+  editorKey?: any;
+  content?: string;
+  setContent?: (value: string) => void;
   disabled?: boolean;
   height?: CSSProperties["height"];
   width?: CSSProperties["width"];
   placeholder?: string;
+  setEditor?: (editor: Editor | null) => void;
 }
 
 const SimpleEditorWrapper: React.FC<SimpleEditorWrapperProps> = ({
@@ -24,6 +26,7 @@ const SimpleEditorWrapper: React.FC<SimpleEditorWrapperProps> = ({
   height,
   width,
   placeholder,
+  setEditor,
 }) => {
   return (
     <div
@@ -45,6 +48,7 @@ const SimpleEditorWrapper: React.FC<SimpleEditorWrapperProps> = ({
         setContent={setContent}
         disabled={disabled}
         placeholder={placeholder}
+        setEditor={setEditor}
       />
     </div>
   );

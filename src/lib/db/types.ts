@@ -20,6 +20,7 @@ export enum Table {
   UserProfiles = "user_profiles",
   Waitlists = "waitlists",
   WidgetAssets = "widget_assets",
+  WidgetAudits = "widget_audits",
   WidgetCategories = "widget_categories",
   WidgetLikes = "widget_likes",
   WidgetVersionAssets = "widget_version_assets",
@@ -47,6 +48,7 @@ export type Tables = {
   "user_profiles": UserProfiles,
   "waitlists": Waitlists,
   "widget_assets": WidgetAssets,
+  "widget_audits": WidgetAudits,
   "widget_categories": WidgetCategories,
   "widget_likes": WidgetLikes,
   "widget_version_assets": WidgetVersionAssets,
@@ -226,6 +228,16 @@ export type Waitlists = {
 export type WidgetAssets = {
   widget_id: number;
   asset_id: number;
+};
+
+export type WidgetAudits = {
+  id: number;
+  widget_version_id: number;
+  auditor_id: string | null;
+  action: string;
+  notes: string | null;
+  created_at: Date;
+  updated_at: Date;
 };
 
 export type WidgetCategories = {

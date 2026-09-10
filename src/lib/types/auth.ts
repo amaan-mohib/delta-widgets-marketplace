@@ -6,4 +6,5 @@ export interface IUser {
   emailVerified: boolean;
   name: string;
   image?: string | null;
+  role?: string | null;
 }

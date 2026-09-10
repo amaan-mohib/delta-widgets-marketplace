@@ -1,7 +1,9 @@
 "use client";
 
+import { useAuth } from "@/store/use-auth";
 import { Button } from "@fluentui/react-components";
 import {
+  AgentsRegular,
   AppsRegular,
   BoardRegular,
   PersonRegular,
@@ -11,7 +13,7 @@ import Link from "next/link";
 import React from "react";
 
 interface DashboardSidebarProps {
-  activeTab: "dashboard" | "my-widgets" | "profile";
+  activeTab: "dashboard" | "my-widgets" | "profile" | "admin";
 }
 
 const items = [
@@ -36,8 +38,20 @@ const items = [
 ];
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ activeTab }) => {
+  const { user } = useAuth();
+
   return (
     <div className="dashboard-nav flex flex-col p-2 border-r pl-0">
+      {user?.role === "admin" && (
+        <Link href={"/dashboard/admin"}>
+          <Button
+            icon={<AgentsRegular />}
+            appearance={activeTab === "admin" ? "primary" : "subtle"}
+            style={{ width: "100%", justifyContent: "start" }}>
+            Admin
+          </Button>
+        </Link>
+      )}
       {items.map((item) => (
         <Link href={item.link} key={item.value}>
           <Button
