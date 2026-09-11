@@ -1,5 +1,6 @@
 "use server";
 import { auth } from "@/lib/auth/server";
+import { Table, Widgets, WidgetVersions } from "@/lib/db";
 import models from "@/lib/db/models";
 import { connection } from "next/server";
 
@@ -51,6 +52,56 @@ export const test = async () => {
       return r(templates);
     }, 100),
   );
+};
+
+export const getWidgets = async (
+  sortBy: "likes" | "published_at" | "download_count",
+) => {
+  const widgets: (Pick<
+    Widgets,
+    "id" | "key" | "download_count" | "widget_type" | "likes" | "published_at"
+  > &
+    Pick<WidgetVersions, "label" | "version" | "status"> & {
+      screenshot_src: string;
+      version_id: number;
+      creator: string;
+    })[] = await models
+    .Widgets("w")
+    .select(
+      "w.id",
+      "w.key",
+      "w.download_count",
+      "w.widget_type",
+      "w.likes",
+      "w.published_at",
+      "wv.label",
+      "wv.id as version_id",
+      "wv.version",
+      "wv.status",
+      "p.username as creator",
+      models
+        .Assets("a")
+        .join({ wva: Table.WidgetVersionAssets }, "a.id", "wva.asset_id")
+        .whereRaw("wva.widget_version_id = wv.id")
+        .where("a.asset_type", "SCREENSHOT")
+        .orderBy("wva.sort_order")
+        .limit(1)
+        .select("a.src")
+        .as("screenshot_src"),
+    )
+    .joinRaw(
+      `JOIN (
+              SELECT DISTINCT ON (widget_id) *
+              FROM ${Table.WidgetVersions}
+              ORDER BY widget_id, created_at DESC
+            ) wv ON w.id = wv.widget_id`,
+    )
+    .join({ p: Table.UserProfiles }, "p.user_id", "w.author_id")
+    .where("wv.status", "PUBLISHED")
+    .orderBy(`w.${sortBy}`, "desc")
+    .limit(20);
+
+  return widgets;
 };
 
 export const getUserProfile = async (userId: string) => {

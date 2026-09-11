@@ -12,7 +12,7 @@ import {
 } from "@fluentui/react-components";
 import { IconDownload, IconHeart } from "@tabler/icons-react";
 
-interface WidgetCardProps {
+export interface WidgetCardProps {
   widget: {
     id: number;
     key: string;
@@ -21,7 +21,7 @@ interface WidgetCardProps {
     screenshot_src: string;
     download_count: string | number | null;
     status?: string;
-    likes?: number;
+    likes?: string | null | number;
   };
   showStatus?: boolean;
 }
@@ -30,6 +30,7 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ widget, showStatus }) => {
   return (
     <a href={`/widget/${widget.key}`}>
       <Card
+        size="small"
         appearance="filled-alternative"
         onClick={() => {}}
         className="h-full min-h-42.5">

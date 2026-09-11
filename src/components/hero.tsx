@@ -14,6 +14,7 @@ import {
   SearchRegular,
   TagRegular,
 } from "@fluentui/react-icons";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface HeroProps {
@@ -32,40 +33,34 @@ const Hero: React.FC<HeroProps> = ({ tab }) => {
         </Body1>
       </div>
       <div className="flex items-center overflow-auto flex-wrap">
-        <div>
-          <TabList
-            selectedValue={tab}
-            onTabSelect={(_, { value }) => {
-              switch (value) {
-                case "discover":
-                  router.push("/");
-                  break;
-                case "categories":
-                case "tags":
-                  router.push("/" + value);
-                  break;
-                default:
-                  break;
-              }
-            }}>
-            <Tab value="discover" icon={<BoardRegular />}>
-              Discover
-            </Tab>
-            <Tab value="categories" icon={<CollectionsEmptyRegular />}>
-              Categories
-            </Tab>
-            <Tab value="tags" icon={<TagRegular />}>
-              Tags
-            </Tab>
+        <div className="-ml-3">
+          <TabList selectedValue={tab}>
+            <Link href="/">
+              <Tab value="discover" icon={<BoardRegular />}>
+                Discover
+              </Tab>
+            </Link>
+            <Link href="/categories">
+              <Tab value="categories" icon={<CollectionsEmptyRegular />}>
+                Categories
+              </Tab>
+            </Link>
+            <Link href="/tags">
+              <Tab value="tags" icon={<TagRegular />}>
+                Tags
+              </Tab>
+            </Link>
           </TabList>
         </div>
-        <div className="flex items-center gap-2 ml-10">
+        <div className="flex items-center gap-2 ml-13">
+          <Link href="/search">
+            <Button appearance="subtle" icon={<SearchRegular />} />
+          </Link>
           <Button
             appearance="subtle"
-            icon={<SearchRegular />}
-            onClick={() => router.push("/search")}
+            icon={<ArrowClockwiseRegular />}
+            onClick={() => router.refresh()}
           />
-          <Button appearance="subtle" icon={<ArrowClockwiseRegular />} />
         </div>
       </div>
     </section>

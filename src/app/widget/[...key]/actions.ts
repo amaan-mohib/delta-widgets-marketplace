@@ -263,6 +263,7 @@ export const auditAction = async (
       olderVersions.forEach((v) => {
         updateTag(`widget-${widgetKey}-${v.version}`);
       });
+      updateTag(`widgets`);
     }
     // TODO: send emails
     await trx.commit();
