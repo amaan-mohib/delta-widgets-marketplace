@@ -31,34 +31,46 @@ const Approval: React.FC<ApprovalProps> = ({
   const [audits, setAudits] = useState<
     Omit<WidgetAudits, "auditor_id" | "updated_at">[]
   >([]);
-  const [notes, setNotes] = useState("");
   const [action, setAction] = useState("PUBLISHED");
   const [loading, setLoading] = useState(false);
   const [editor, setEditor] = useState<Editor | null>(null);
 
-  const getHistory = () => {
-    getAuditHistory(widgetVersion.id).then((data) => {
+  const getHistory = async () => {
+    try {
+      const data = await getAuditHistory(widgetVersion.id);
       setAudits(data);
-    });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const onSubmit = async () => {
+    if (
+      ["PUBLISHED", "REJECTED", "SUSPENDED"].includes(action) &&
+      audits.length > 0 &&
+      action === audits[0].action
+    ) {
+      alert(`Widget is already ${action.toLowerCase()}`);
+      return;
+    }
+
     try {
       setLoading(true);
+      const notesText = editor?.getText() ?? "";
       await auditAction(
         action,
-        notes === "<p></p>" ? "" : notes,
+        notesText ? (editor?.getHTML() ?? "") : "",
         widgetVersion.id,
         widgetKey,
       );
-      getHistory();
-      setNotes("");
+      await getHistory();
       editor && editor.commands.setContent("");
       setLoading(false);
       if (action !== "COMMENT") {
         window.location.reload();
       }
-    } catch (error) {
+    } catch (error: any) {
+      alert(error.message || error);
       setLoading(false);
     }
   };
@@ -89,8 +101,6 @@ const Approval: React.FC<ApprovalProps> = ({
               <SimpleEditorWrapper
                 {...props}
                 editorKey={`notes-${widgetVersion.version}`}
-                content={notes}
-                setContent={(value) => setNotes(value)}
                 placeholder="Add notes if required."
                 setEditor={(editor) => setEditor(editor)}
               />

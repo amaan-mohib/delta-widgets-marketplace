@@ -1,8 +1,9 @@
 "use server";
 
 import { getAuthUser } from "@/app/actions";
-import db, { Table } from "@/lib/db";
+import db, { Table, WidgetVersions } from "@/lib/db";
 import models from "@/lib/db/models";
+import { Knex } from "knex";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 
 export const getWidget = async ({
@@ -150,6 +151,73 @@ export const getAuditHistory = async (widget_version_id: number) => {
     .orderBy("created_at", "desc");
 };
 
+const updateWidgetStatus = async (
+  action: string,
+  id: number,
+  trx: Knex.Transaction,
+) => {
+  await models
+    .WidgetVersions()
+    .update({
+      status: action === "REQUESTED_CHANGE" ? "IN_REVIEW" : action,
+      published_at: action === "PUBLISHED" ? trx.fn.now() : null,
+    })
+    .where("id", id)
+    .transacting(trx);
+};
+
+const suspendOlderWidgets = async (
+  action: string,
+  widgetVersion: WidgetVersions,
+  userId: string,
+  trx: Knex.Transaction,
+) => {
+  const olderVersions = await models
+    .WidgetVersions()
+    .where("widget_id", widgetVersion.widget_id)
+    .andWhere("revision", "<", widgetVersion.revision)
+    .andWhere("status", "<>", "SUSPENDED")
+    .transacting(trx);
+  if (olderVersions.length === 0) {
+    return [];
+  }
+  await models
+    .WidgetVersions()
+    .update({ status: "SUSPENDED", published_at: null })
+    .whereIn(
+      "id",
+      olderVersions.map((i) => i.id),
+    )
+    .transacting(trx);
+  await models
+    .WidgetAudits()
+    .insert(
+      olderVersions.map((v) => ({
+        action: "SUSPENDED",
+        notes: `Suspended because a new version was ${action.toLowerCase().replace(/_/g, " ")}`,
+        auditor_id: userId,
+        widget_version_id: v.id,
+      })),
+    )
+    .transacting(trx);
+
+  return olderVersions;
+};
+
+export const syncCategoryCount = async (trx?: Knex.Transaction) => {
+  await (trx || db).raw(
+    `UPDATE ${Table.Categories} c
+        SET count = (
+          SELECT COUNT(DISTINCT wv.widget_id)
+          FROM ${Table.WidgetVersionCategories} wvc
+          JOIN ${Table.WidgetVersions} wv
+            ON wv.id = wvc.widget_version_id
+          WHERE wvc.category_id = c.id
+            AND wv.status = 'PUBLISHED'
+        )`,
+  );
+};
+
 export const auditAction = async (
   action: string,
   notes: string,
@@ -181,58 +249,15 @@ export const auditAction = async (
       })
       .transacting(trx);
     if (action !== "COMMENT") {
-      await models
-        .WidgetVersions()
-        .update({
-          status: action === "REQUESTED_CHANGE" ? "IN_REVIEW" : action,
-          published_at: action === "PUBLISHED" ? trx.fn.now() : null,
-        })
-        .where("id", widgetVersion.id)
-        .transacting(trx);
-
-      const olderVersions = await models
-        .WidgetVersions()
-        .where("widget_id", widgetVersion.widget_id)
-        .andWhere("revision", "<", widgetVersion.revision)
-        .transacting(trx);
-      await models
-        .WidgetVersions()
-        .update({ status: "SUSPENDED", published_at: null })
-        .whereIn(
-          "id",
-          olderVersions.map((i) => i.id),
-        )
-        .transacting(trx);
-      await models
-        .WidgetAudits()
-        .insert(
-          olderVersions.map((v) => ({
-            action: "SUSPENDED",
-            notes: `Suspended because a new version was ${action.toLowerCase().replace(/_/g, " ")}`,
-            auditor_id: user.id,
-            widget_version_id: v.id,
-          })),
-        )
-        .transacting(trx);
-
-      await trx.raw(
-        `
-        UPDATE ${Table.Categories} c
-        SET count = (
-          SELECT COUNT(DISTINCT wv.widget_id)
-          FROM widget_version_categories wvc
-          JOIN widget_versions wv
-            ON wv.id = wvc.widget_version_id
-          WHERE wvc.category_id = c.id
-            AND wv.status = 'PUBLISHED'
-        )
-        WHERE c.id IN (
-          SELECT category_id
-          FROM ${Table.WidgetVersionCategories}
-          WHERE widget_version_id IN (${[...olderVersions, widgetVersion].map(() => "?").join(",")})
-        )`,
-        [...olderVersions.map((i) => i.id), widgetVersion.id],
+      await updateWidgetStatus(action, widgetVersion.id, trx);
+      const olderVersions = await suspendOlderWidgets(
+        action,
+        widgetVersion,
+        user.id,
+        trx,
       );
+      await syncCategoryCount(trx);
+
       updateTag(`widget-${widgetKey}`);
       updateTag(`widget-${widgetKey}-${widgetVersion.version}`);
       olderVersions.forEach((v) => {
