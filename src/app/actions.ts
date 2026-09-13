@@ -134,7 +134,7 @@ export async function getAuthUser() {
     const user = session.user;
     const profile = await models
       .UserProfiles()
-      .select("username", "created_at")
+      .select("username", "donation_links", "created_at")
       .where("user_id", user.id)
       .first();
     return {
@@ -145,3 +145,38 @@ export async function getAuthUser() {
     return null;
   }
 }
+
+export const getDonationLinks = async (username: string) => {
+  return await models
+    .UserProfiles()
+    .select("donation_links")
+    .where("username", username)
+    .first();
+};
+
+export const sendMixpanelEvent = async (
+  event: string,
+  properties: Record<any, any> = {},
+) => {
+  try {
+    await fetch("https://api.mixpanel.com/track?ip=0", {
+      method: "POST",
+      headers: {
+        accept: "text/plain",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify([
+        {
+          event,
+          properties: {
+            token: process.env.MIXPANEL_TOKEN,
+            env: process.env.NODE_ENV,
+            ...(properties || {}),
+          },
+        },
+      ]),
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};

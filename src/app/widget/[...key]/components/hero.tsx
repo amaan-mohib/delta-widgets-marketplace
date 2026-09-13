@@ -1,6 +1,6 @@
 "use client";
 
-import { Widgets, WidgetVersions } from "@/lib/db";
+import { UserProfiles, Widgets, WidgetVersions } from "@/lib/db";
 import {
   Badge,
   Body1,
@@ -18,6 +18,7 @@ import {
   ArrowDownloadRegular,
   HeartFilled,
   HeartRegular,
+  RibbonStarRegular,
   ShareRegular,
 } from "@fluentui/react-icons";
 import { getStatusText } from "@/lib/utils";
@@ -25,10 +26,12 @@ import { useAuth } from "@/store/use-auth";
 import { useDataStore } from "@/store/use-data-store";
 import { getIfUserLiked, likeAction } from "../actions";
 import { usePathname, useRouter } from "next/navigation";
+import { getDonationLinks } from "@/app/actions";
+import DonationDialog from "@/components/donation-dialog";
 
 interface HeroProps {
   widget: Widgets;
-  creator: string;
+  creator: Pick<UserProfiles, "username" | "donation_links">;
   likes: number;
   isAuthor: boolean;
   version: Partial<WidgetVersions>;
@@ -50,6 +53,7 @@ const Hero: React.FC<HeroProps> = ({
   const { user } = useAuth();
   const clientId = useDataStore((s) => s.clientId);
   const [visibleTooltip, setVisibleTooltip] = useState(false);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -107,15 +111,38 @@ const Hero: React.FC<HeroProps> = ({
           </div>
         )}
         <Title1>{version.label}</Title1>
-        <Link href={`/creator/${creator}`} className="w-fit">
-          <Body1
-            className="hover:underline"
-            style={{
-              color: tokens.colorBrandForegroundLink,
-            }}>
-            @{creator}
-          </Body1>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/creator/${creator.username}`} className="w-fit">
+            <Body1
+              className="hover:underline"
+              style={{
+                color: tokens.colorBrandForegroundLink,
+              }}>
+              @{creator.username}
+            </Body1>
+          </Link>
+          {creator.donation_links?.length !== 0 && (
+            <>
+              <div>
+                <Divider vertical />
+              </div>
+              <Button
+                style={{ width: "fit-content" }}
+                appearance="outline"
+                icon={<RibbonStarRegular fontSize={16} />}
+                size="small"
+                onClick={() => setOpen(true)}>
+                Tip Creator
+              </Button>
+              <DonationDialog
+                username={creator.username}
+                open={open}
+                setOpen={setOpen}
+                links={creator.donation_links}
+              />
+            </>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-2 mt-5">
         <Button

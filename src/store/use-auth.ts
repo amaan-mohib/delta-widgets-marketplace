@@ -4,7 +4,10 @@ import { create } from "zustand";
 
 interface IAuth {
   user: IUser | null;
-  profile: Pick<UserProfiles, "username" | "created_at"> | null;
+  profile: Pick<
+    UserProfiles,
+    "username" | "created_at" | "donation_links"
+  > | null;
   loading: boolean;
 }
 

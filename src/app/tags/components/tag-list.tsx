@@ -11,7 +11,7 @@ import {
   CardPreview,
   tokens,
 } from "@fluentui/react-components";
-import { AppsRegular } from "@fluentui/react-icons";
+import { NumberSymbolRegular } from "@fluentui/react-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -43,7 +43,7 @@ const TagList: React.FC<TagListProps> = ({
             className="h-full">
             <CardPreview className="p-3 my-auto h-full">
               <div style={{ display: "grid", placeItems: "center" }}>
-                <AppsRegular
+                <NumberSymbolRegular
                   fontSize={52}
                   style={{ color: tokens.colorNeutralForeground2 }}
                 />

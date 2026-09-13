@@ -60,16 +60,16 @@ const TagPage: React.FC<TagPageProps> = ({ widgets, total, page, slug }) => {
           ))}
         </WidgetGrid>
       )}
-      <div className="flex items-center justify-center">
-        {total > PAGE_SIZE && (
+      {total > PAGE_SIZE && (
+        <div className="flex items-center justify-center">
           <Pagination
             page={page}
             total={total}
             onChange={(page) => router.push(`${pathname}?page=` + page)}
             pageSize={PAGE_SIZE}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

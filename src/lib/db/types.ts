@@ -219,6 +219,7 @@ export type UserProfiles = {
   username: string;
   created_at: Date;
   updated_at: Date;
+  donation_links: unknown[] | null;
 };
 
 export type Waitlists = {

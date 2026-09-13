@@ -27,7 +27,7 @@ export const getWidget = async ({
   }
   const authorProfile = await models
     .UserProfiles()
-    .select("username")
+    .select("username", "donation_links")
     .where("user_id", widget.author_id)
     .first();
   if (!authorProfile) {
@@ -78,7 +78,7 @@ export const getWidget = async ({
     versions: versions.map((v) => v.version),
     assets,
     isWidgetAuthor,
-    creator: authorProfile.username,
+    creator: authorProfile,
     selectedVersion,
     tags,
   };
