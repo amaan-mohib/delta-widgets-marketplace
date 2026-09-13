@@ -6,6 +6,11 @@ import { WidgetWithCreator } from "@/lib/types/server";
 import { Suspense } from "react";
 import CategoryList from "./components/category-list";
 import Loader from "../../components/loader";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Categories",
+};
 
 const CategoryListPage = async (props: PageProps<"/categories">) => {
   const searchParams = await props.searchParams;

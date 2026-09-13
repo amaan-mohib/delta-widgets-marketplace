@@ -45,7 +45,10 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: WEBSITE_URL,
     siteName: APP_NAME,
-    title: `${APP_NAME} Gallery`,
+    title: {
+      template: `%s | ${APP_NAME} Gallery`,
+      default: APP_NAME + " Gallery",
+    },
     description:
       "Create beautiful, dynamic desktop widgets without coding. Drag-and-drop builder, custom templates, and real-time data integration.",
     images: [
@@ -65,7 +68,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@amaan_mohib",
     creator: "@amaan_mohib",
-    title: `${APP_NAME} Gallery`,
+    title: {
+      template: `%s | ${APP_NAME} Gallery`,
+      default: APP_NAME + " Gallery",
+    },
     description:
       "Create beautiful, dynamic desktop widgets without coding. Drag-and-drop builder, custom templates, and real-time data integration.",
     images: ["/delta-widgets-icon.png", "/images/design-mode/ss-1.png"],

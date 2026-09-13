@@ -1,8 +1,13 @@
 import { Header } from "@/components/header";
 import DashboardSidebar from "../components/sidebar";
 import WidgetTable from "./widget-table";
+import { Metadata } from "next";
 
 export const instant = false;
+
+export const metadata: Metadata = {
+  title: "My Widgets",
+};
 
 const MyWidgets = async (props: PageProps<"/dashboard/my-widgets">) => {
   const searchParams = await props.searchParams;

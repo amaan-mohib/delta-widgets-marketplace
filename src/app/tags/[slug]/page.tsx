@@ -7,6 +7,36 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import TagPage from "./tag-page";
 import Loader from "@/components/loader";
+import { Metadata, ResolvingMetadata } from "next";
+
+export async function generateMetadata(
+  { params }: PageProps<"/tags/[slug]">,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const slug = (await params).slug;
+  const parentMeta = await parent;
+
+  const title = slug === "all" ? "All Widgets" : `#${slug}`;
+  const description =
+    slug === "all"
+      ? "Check out all the widgets on Delta Widgets."
+      : `Check out widgets tagged by #${slug} on Delta Widgets.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      ...parentMeta.openGraph,
+      title,
+      description,
+    },
+    twitter: {
+      ...parentMeta.twitter,
+      title,
+      description,
+    },
+  };
+}
 
 const Tag = async (props: PageProps<"/tags/[slug]">) => {
   const searchParams = await props.searchParams;

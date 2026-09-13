@@ -1,8 +1,13 @@
 import { Header } from "@/components/header";
 import DashboardSidebar from "../components/sidebar";
 import ProfilePage from "./profile-page";
+import { Metadata } from "next";
 
 export const instant = false;
+
+export const metadata: Metadata = {
+  title: "Profile",
+};
 
 interface ProfileProps {}
 

@@ -5,6 +5,11 @@ import { Suspense } from "react";
 import TagList from "./components/tag-list";
 import db, { Table } from "@/lib/db";
 import Loader from "@/components/loader";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Tags",
+};
 
 const TagListPage = async (props: PageProps<"/tags">) => {
   const searchParams = await props.searchParams;

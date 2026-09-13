@@ -6,6 +6,51 @@ import { NeonAuthUser, Table, UserProfiles } from "@/lib/db";
 import { notFound } from "next/navigation";
 import CreatorPage from "./components/creator-page";
 import { WidgetWithCreator } from "@/lib/types/server";
+import { Metadata, ResolvingMetadata } from "next";
+
+export async function generateMetadata(
+  { params }: PageProps<"/creator/[username]">,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const username = (await params).username;
+  const creator: Pick<NeonAuthUser, "name" | "image"> &
+    Pick<UserProfiles, "username"> = await models
+    .NeonAuthUser("u")
+    .select("u.name", "u.image", "p.username")
+    .join({ p: Table.UserProfiles }, "u.id", "p.user_id")
+    .where("p.username", username)
+    .first();
+  if (!creator) {
+    return {};
+  }
+
+  const parentMeta = await parent;
+  const title = creator.name;
+  const description = `See widgets published by ${creator.name} (@${username}) on Delta Widgets.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      ...parentMeta.openGraph,
+      title,
+      description,
+      images: [
+        ...(parentMeta.openGraph?.images || []),
+        ...(creator.image ? [creator.image] : []),
+      ],
+    },
+    twitter: {
+      ...parentMeta.twitter,
+      title,
+      description,
+      images: [
+        ...(parentMeta.twitter?.images || []),
+        ...(creator.image ? [creator.image] : []),
+      ],
+    },
+  };
+}
 
 const Page = async (props: PageProps<"/creator/[username]">) => {
   const { username } = await props.params;

@@ -166,10 +166,11 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
         <div className="mt-5">
           {profile?.donation_links ? (
             <div className="flex flex-col gap-2 mb-5">
-              {" "}
               {profile.donation_links.map((link) => (
-                <div className="flex items-center justify-between max-w-lg gap-2">
-                  <Link key={`${link}`} href={link as string} target="_blank">
+                <div
+                  key={`${link}`}
+                  className="flex items-center justify-between max-w-lg gap-2">
+                  <Link href={link as string} target="_blank">
                     {link}
                   </Link>
                   <Button

@@ -5,84 +5,87 @@ import db, { Table, WidgetVersions } from "@/lib/db";
 import models from "@/lib/db/models";
 import { Knex } from "knex";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
+import { cache } from "react";
 
-export const getWidget = async ({
-  widgetKey,
-  userId,
-  versionParam,
-  isAdmin,
-}: {
-  widgetKey: string;
-  userId?: string;
-  versionParam?: string;
-  isAdmin?: boolean;
-}) => {
-  "use cache";
-  cacheLife("hours");
-  cacheTag(`widget-${widgetKey}${versionParam ? "" : `-${versionParam}`}`);
+export const getWidget = cache(
+  async ({
+    widgetKey,
+    userId,
+    versionParam,
+    isAdmin,
+  }: {
+    widgetKey: string;
+    userId?: string;
+    versionParam?: string;
+    isAdmin?: boolean;
+  }) => {
+    "use cache";
+    cacheLife("hours");
+    cacheTag(`widget-${widgetKey}${versionParam ? "" : `-${versionParam}`}`);
 
-  const widget = await models.Widgets().where("key", widgetKey).first();
-  if (!widget) {
-    return null;
-  }
-  const authorProfile = await models
-    .UserProfiles()
-    .select("username", "donation_links")
-    .where("user_id", widget.author_id)
-    .first();
-  if (!authorProfile) {
-    return null;
-  }
-  const versions = await models
-    .WidgetVersions()
-    .where("widget_id", widget.id)
-    .orderBy("revision", "desc");
-  const approvedVersion = versions.find((v) => v.status === "PUBLISHED");
-  const isWidgetAuthor =
-    isAdmin || (userId ? userId === widget.author_id : false);
-  const latestVersion = isWidgetAuthor ? versions[0] : approvedVersion;
+    const widget = await models.Widgets().where("key", widgetKey).first();
+    if (!widget) {
+      return null;
+    }
+    const authorProfile = await models
+      .UserProfiles()
+      .select("username", "donation_links")
+      .where("user_id", widget.author_id)
+      .first();
+    if (!authorProfile) {
+      return null;
+    }
+    const versions = await models
+      .WidgetVersions()
+      .where("widget_id", widget.id)
+      .orderBy("revision", "desc");
+    const approvedVersion = versions.find((v) => v.status === "PUBLISHED");
+    const isWidgetAuthor =
+      isAdmin || (userId ? userId === widget.author_id : false);
+    const latestVersion = isWidgetAuthor ? versions[0] : approvedVersion;
 
-  if ((!approvedVersion && !isWidgetAuthor) || !latestVersion) {
-    return null;
-  }
+    if ((!approvedVersion && !isWidgetAuthor) || !latestVersion) {
+      return null;
+    }
 
-  let selectedVersion = latestVersion;
-  const version = versionParam
-    ? versions.find((item) => item.version === versionParam)
-    : null;
-  if (isWidgetAuthor && version) {
-    selectedVersion = version;
-  }
+    let selectedVersion = latestVersion;
+    const version = versionParam
+      ? versions.find((item) => item.version === versionParam)
+      : null;
+    if (isWidgetAuthor && version) {
+      selectedVersion = version;
+    }
 
-  const assets = await models
-    .Assets("a")
-    .select("a.id", "a.file_name", "a.size", "a.src", "a.asset_type")
-    .join({ w: Table.WidgetVersionAssets }, "a.id", "w.asset_id")
-    .where("w.widget_version_id", selectedVersion.id)
-    .orderBy("w.sort_order");
+    const assets = await models
+      .Assets("a")
+      .select("a.id", "a.file_name", "a.size", "a.src", "a.asset_type")
+      .join({ w: Table.WidgetVersionAssets }, "a.id", "w.asset_id")
+      .where("w.widget_version_id", selectedVersion.id)
+      .orderBy("w.sort_order");
 
-  const tagSlugs = await models
-    .Categories()
-    .select("slug")
-    .whereIn(
-      "id",
-      models
-        .WidgetVersionCategories()
-        .select("category_id")
-        .where("widget_version_id", selectedVersion.id),
-    );
-  const tags = tagSlugs.map((t) => t.slug);
+    const tagSlugs = await models
+      .Categories()
+      .select("slug")
+      .whereIn(
+        "id",
+        models
+          .WidgetVersionCategories()
+          .select("category_id")
+          .where("widget_version_id", selectedVersion.id),
+      );
+    const tags = tagSlugs.map((t) => t.slug);
 
-  return {
-    widget,
-    versions: versions.map((v) => v.version),
-    assets,
-    isWidgetAuthor,
-    creator: authorProfile,
-    selectedVersion,
-    tags,
-  };
-};
+    return {
+      widget,
+      versions: versions.map((v) => v.version),
+      assets,
+      isWidgetAuthor,
+      creator: authorProfile,
+      selectedVersion,
+      tags,
+    };
+  },
+);
 
 export const getIfUserLiked = async ({
   widget_id,

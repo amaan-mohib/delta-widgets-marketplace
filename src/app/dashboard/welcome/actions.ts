@@ -19,7 +19,7 @@ export const createUsername = async (username: string) => {
       user_id: user.id,
       username,
     })
-    .returning(["username", "created_at"]);
+    .returning(["username", "created_at", "donation_links"]);
 
   return profile;
 };

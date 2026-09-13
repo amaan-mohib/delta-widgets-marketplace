@@ -5,8 +5,13 @@ import models from "@/lib/db/models";
 import { Table } from "@/lib/db";
 import { getAuthUser } from "../actions";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
 
 export const instant = false;
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 const Dashboard = async () => {
   const user = await getAuthUser();
