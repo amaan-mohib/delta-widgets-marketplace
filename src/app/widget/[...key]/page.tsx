@@ -1,7 +1,7 @@
 import RootLayout from "@/components/root-layout";
 import { Suspense } from "react";
 import WidgetPage from "./widget-page";
-import Loader from "./components/loader";
+import Loader from "../../../components/loader";
 
 const Widget = async (props: PageProps<"/widget/[...key]">) => {
   return (

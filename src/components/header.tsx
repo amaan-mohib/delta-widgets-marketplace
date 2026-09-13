@@ -4,6 +4,7 @@ import {
   Avatar,
   Button,
   Menu,
+  MenuItem,
   MenuItemLink,
   MenuList,
   MenuPopover,
@@ -18,6 +19,7 @@ import { useDataStore } from "@/store/use-data-store";
 import { useMemo } from "react";
 import { useAuth } from "@/store/use-auth";
 import Image from "next/image";
+import { authClient } from "@/lib/auth/client";
 
 interface HeaderProps {
   isDashboard?: boolean;
@@ -85,7 +87,13 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
                     <MenuItemLink href="/dashboard/admin">Admin</MenuItemLink>
                   )}
                   <MenuItemLink href="/dashboard/profile">Profile</MenuItemLink>
-                  <MenuItemLink href="/logout">Log out</MenuItemLink>
+                  <MenuItem
+                    onClick={async () => {
+                      await authClient.signOut();
+                      window.location.href = "/";
+                    }}>
+                    Log out
+                  </MenuItem>
                 </MenuList>
               </MenuPopover>
             </Menu>

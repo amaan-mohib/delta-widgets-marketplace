@@ -6,6 +6,7 @@ import {
   Tab,
   TabList,
   Title1,
+  Tooltip,
 } from "@fluentui/react-components";
 import {
   ArrowClockwiseRegular,
@@ -16,13 +17,22 @@ import {
 } from "@fluentui/react-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 interface HeroProps {
-  tab: "discover" | "categories" | "tags";
+  tab: "discover" | "categories" | "tags" | "search";
 }
 
 const Hero: React.FC<HeroProps> = ({ tab }) => {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const handleRefresh = () => {
+    startTransition(() => {
+      router.refresh();
+    });
+  };
+
   return (
     <section>
       <div className="flex flex-col gap-2 pt-8 pb-5">
@@ -32,37 +42,50 @@ const Hero: React.FC<HeroProps> = ({ tab }) => {
           to make your own.
         </Body1>
       </div>
-      <div className="flex items-center overflow-auto flex-wrap">
-        <div className="-ml-3">
-          <TabList selectedValue={tab}>
-            <Link href="/">
-              <Tab value="discover" icon={<BoardRegular />}>
-                Discover
-              </Tab>
-            </Link>
-            <Link href="/categories">
-              <Tab value="categories" icon={<CollectionsEmptyRegular />}>
-                Categories
-              </Tab>
-            </Link>
-            <Link href="/tags">
-              <Tab value="tags" icon={<TagRegular />}>
-                Tags
-              </Tab>
-            </Link>
-          </TabList>
+      {tab !== "search" && (
+        <div className="flex items-center overflow-auto flex-wrap">
+          <div className="-ml-3">
+            <TabList selectedValue={tab}>
+              <Link href="/">
+                <Tab value="discover" icon={<BoardRegular />}>
+                  Discover
+                </Tab>
+              </Link>
+              <Link href="/categories">
+                <Tab value="categories" icon={<CollectionsEmptyRegular />}>
+                  Categories
+                </Tab>
+              </Link>
+              <Link href="/tags">
+                <Tab value="tags" icon={<TagRegular />}>
+                  Tags
+                </Tab>
+              </Link>
+            </TabList>
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <Tooltip
+              relationship="label"
+              content={"Search"}
+              positioning={"below"}>
+              <Link href="/search">
+                <Button appearance="subtle" icon={<SearchRegular />} />
+              </Link>
+            </Tooltip>
+            <Tooltip
+              relationship="label"
+              content={"Refresh"}
+              positioning={"below-end"}>
+              <Button
+                appearance="subtle"
+                disabled={isPending}
+                icon={<ArrowClockwiseRegular />}
+                onClick={handleRefresh}
+              />
+            </Tooltip>
+          </div>
         </div>
-        <div className="flex items-center gap-2 ml-13">
-          <Link href="/search">
-            <Button appearance="subtle" icon={<SearchRegular />} />
-          </Link>
-          <Button
-            appearance="subtle"
-            icon={<ArrowClockwiseRegular />}
-            onClick={() => router.refresh()}
-          />
-        </div>
-      </div>
+      )}
     </section>
   );
 };

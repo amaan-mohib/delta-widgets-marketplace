@@ -177,7 +177,7 @@ const Hero: React.FC<HeroProps> = ({
             <Button
               key={tag}
               as="a"
-              href={`/tag/${tag}`}
+              href={`/tags/${tag}`}
               size="small"
               shape="circular">
               #{tag}

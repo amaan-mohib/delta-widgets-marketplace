@@ -11,7 +11,8 @@
     "migrate": "knex migrate:latest && npm run post:migrate",
     "migrate:down": "knex migrate:down && npm run post:migrate",
     "post:migrate": "node ./scripts/generateTypes.cjs && tsx ./scripts/generateModels.ts",
-    "copy-commands": "node ./scripts/copyTauriCommands.cjs"
+    "copy-commands": "node ./scripts/copyTauriCommands.cjs",
+    "seed": "knex seed:run"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1119.0",

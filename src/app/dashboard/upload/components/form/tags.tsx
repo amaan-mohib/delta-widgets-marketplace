@@ -12,7 +12,7 @@ interface FormTagsProps {
 function normalizeTag(tag: string) {
   if (!tag) return "";
 
-  return tag
+  const t = tag
     .toLowerCase()
     .trim()
     .replace(/['"]/g, "")
@@ -20,6 +20,8 @@ function normalizeTag(tag: string) {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+  if (t === "all") return "";
+  return t;
 }
 
 const FormTags: React.FC<FormTagsProps> = ({ selectedTags }) => {

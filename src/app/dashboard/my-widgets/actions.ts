@@ -1,20 +1,12 @@
 "use server";
 
 import { getAuthUser } from "@/app/actions";
-import { Table, Widgets, WidgetVersions } from "@/lib/db";
+import { Table } from "@/lib/db";
 import models from "@/lib/db/models";
+import { WidgetType } from "@/lib/types/server";
 import { redirect } from "next/navigation";
 
 const PAGE_SIZE = 30;
-
-type WidgetType = Pick<
-  Widgets,
-  "id" | "key" | "download_count" | "widget_type" | "published_at" | "likes"
-> &
-  Pick<WidgetVersions, "version" | "status" | "label"> & {
-    screenshot_src: string;
-    version_id: number;
-  };
 
 export const getUserWidgets = async (page: number, pageSize?: number) => {
   const user = await getAuthUser();

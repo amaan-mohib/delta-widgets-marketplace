@@ -1,7 +1,9 @@
 "use client";
 
 import WidgetCard, { WidgetCardProps } from "@/components/widget-card";
-import { Subtitle1 } from "@fluentui/react-components";
+import { Button, Subtitle1 } from "@fluentui/react-components";
+import { ArrowRightRegular } from "@fluentui/react-icons";
+import Link from "next/link";
 
 interface HomepageProps {
   trending: WidgetCardProps["widget"][];
@@ -54,6 +56,18 @@ const Homepage: React.FC<HomepageProps> = ({
           </div>
         </>
       )}
+      <div className="py-5 grid place-items-center">
+        <Link href={"/search"}>
+          <Button
+            size="large"
+            appearance="primary"
+            shape="circular"
+            icon={<ArrowRightRegular />}
+            iconPosition="after">
+            Browse more
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 };
