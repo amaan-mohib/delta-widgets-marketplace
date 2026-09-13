@@ -2,6 +2,7 @@
 
 import Pagination from "@/components/pagination";
 import WidgetCard from "@/components/widget-card";
+import WidgetGrid from "@/components/widget-grid";
 import { Categories } from "@/lib/db";
 import { WidgetWithCreator } from "@/lib/types/server";
 import {
@@ -63,9 +64,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
                 </Button>
               </Link>
             </div>
-            <div
-              className="grid pb-5 gap-3"
-              style={{ gridTemplateColumns: "repeat(auto-fit, 200px)" }}>
+            <WidgetGrid className="pb-5">
               {widgetMap[tag.id].map((widget) => (
                 <WidgetCard
                   key={widget.id}
@@ -89,7 +88,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
                   </Card>
                 </Link>
               )}
-            </div>
+            </WidgetGrid>
           </div>
         );
       })}

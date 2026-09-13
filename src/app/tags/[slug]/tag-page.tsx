@@ -2,6 +2,7 @@
 
 import Pagination from "@/components/pagination";
 import WidgetCard from "@/components/widget-card";
+import WidgetGrid from "@/components/widget-grid";
 import { WidgetWithCreator } from "@/lib/types/server";
 import { Body1Strong, Button, Text } from "@fluentui/react-components";
 import { ArrowLeftRegular } from "@fluentui/react-icons";
@@ -47,9 +48,7 @@ const TagPage: React.FC<TagPageProps> = ({ widgets, total, page, slug }) => {
       {total === 0 ? (
         <Text>No widgets tagged with #{slug}</Text>
       ) : (
-        <div
-          className="grid pb-5 gap-3"
-          style={{ gridTemplateColumns: "repeat(auto-fit, 200px)" }}>
+        <WidgetGrid className="pb-5">
           {widgets.map((widget) => (
             <WidgetCard
               key={widget.id}
@@ -59,7 +58,7 @@ const TagPage: React.FC<TagPageProps> = ({ widgets, total, page, slug }) => {
               }}
             />
           ))}
-        </div>
+        </WidgetGrid>
       )}
       <div className="flex items-center justify-center">
         {total > PAGE_SIZE && (

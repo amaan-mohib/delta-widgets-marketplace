@@ -7,6 +7,7 @@ import WidgetCard from "@/components/widget-card";
 import { useAuth } from "@/store/use-auth";
 import Pagination from "@/components/pagination";
 import { useRouter } from "next/navigation";
+import WidgetGrid from "@/components/widget-grid";
 
 interface WidgetTableProps {
   page: number;
@@ -48,9 +49,7 @@ const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
 
   return (
     <div className="h-full relative">
-      <div
-        className="grid pb-5 gap-3"
-        style={{ gridTemplateColumns: "repeat(auto-fit, 200px)" }}>
+      <WidgetGrid className="pb-5">
         {widgets.map((widget) => (
           <WidgetCard
             key={widget.id}
@@ -62,7 +61,7 @@ const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
             showStatus
           />
         ))}
-      </div>
+      </WidgetGrid>
       {total > PAGE_SIZE && (
         <Pagination
           page={page}

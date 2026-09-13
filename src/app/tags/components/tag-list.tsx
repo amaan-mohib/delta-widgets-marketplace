@@ -1,6 +1,7 @@
 "use client";
 
 import Pagination from "@/components/pagination";
+import WidgetGrid from "@/components/widget-grid";
 import { Categories } from "@/lib/db";
 import {
   Body1Strong,
@@ -34,9 +35,7 @@ const TagList: React.FC<TagListProps> = ({
 
   return (
     <div>
-      <div
-        className="grid py-5 gap-3"
-        style={{ gridTemplateColumns: "repeat(auto-fit, 200px)" }}>
+      <WidgetGrid className="py-5">
         <Link href={`/tags/all?previousPage=${page}`}>
           <Card
             appearance="filled-alternative"
@@ -90,7 +89,7 @@ const TagList: React.FC<TagListProps> = ({
             </Card>
           </Link>
         ))}
-      </div>
+      </WidgetGrid>
       {total > 30 && (
         <div className="pb-5 flex items-center justify-center">
           <Pagination

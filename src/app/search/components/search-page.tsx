@@ -21,6 +21,7 @@ import { searchWidgets } from "../actions";
 import { WidgetWithCreator } from "@/lib/types/server";
 import WidgetCard from "@/components/widget-card";
 import Pagination from "@/components/pagination";
+import WidgetGrid from "@/components/widget-grid";
 
 const PAGE_SIZE = 30;
 
@@ -129,9 +130,7 @@ const SearchPage: React.FC<SearchPageProps> = () => {
           <Text>No results found</Text>
         </div>
       )}
-      <div
-        className="grid pb-5 gap-3 mt-5"
-        style={{ gridTemplateColumns: "repeat(auto-fit, 200px)" }}>
+      <WidgetGrid className="pb-5 mt-5">
         {widgets.map((widget) => (
           <WidgetCard
             key={widget.id}
@@ -141,7 +140,7 @@ const SearchPage: React.FC<SearchPageProps> = () => {
             }}
           />
         ))}
-      </div>
+      </WidgetGrid>
       {total > PAGE_SIZE && (
         <div className="flex items-center justify-center mt-5">
           <Pagination

@@ -1,6 +1,7 @@
 "use client";
 
 import WidgetCard, { WidgetCardProps } from "@/components/widget-card";
+import WidgetGrid from "@/components/widget-grid";
 import { Button, Subtitle1 } from "@fluentui/react-components";
 import { ArrowRightRegular } from "@fluentui/react-icons";
 import Link from "next/link";
@@ -21,25 +22,21 @@ const Homepage: React.FC<HomepageProps> = ({
       <div className="mt-5">
         <Subtitle1>Trending</Subtitle1>
       </div>
-      <div
-        className="grid py-5 gap-3"
-        style={{ gridTemplateColumns: "repeat(auto-fit, 200px)" }}>
+      <WidgetGrid className="py-5">
         {trending.map((item) => (
           <WidgetCard key={item.key} widget={item} />
         ))}
-      </div>
+      </WidgetGrid>
       {newWidgets.length > 0 && (
         <>
           <div className="mt-5">
             <Subtitle1>New Widgets</Subtitle1>
           </div>
-          <div
-            className="grid py-5 gap-3"
-            style={{ gridTemplateColumns: "repeat(auto-fit, 200px)" }}>
+          <WidgetGrid className="py-5">
             {newWidgets.map((item) => (
               <WidgetCard key={item.key} widget={item} />
             ))}
-          </div>
+          </WidgetGrid>
         </>
       )}
       {popular.length > 0 && (
@@ -47,13 +44,11 @@ const Homepage: React.FC<HomepageProps> = ({
           <div className="mt-5">
             <Subtitle1>Popular</Subtitle1>
           </div>
-          <div
-            className="grid py-5 gap-3"
-            style={{ gridTemplateColumns: "repeat(auto-fit, 200px)" }}>
+          <WidgetGrid className="py-5">
             {popular.map((item) => (
               <WidgetCard key={item.key} widget={item} />
             ))}
-          </div>
+          </WidgetGrid>
         </>
       )}
       <div className="py-5 grid place-items-center">
