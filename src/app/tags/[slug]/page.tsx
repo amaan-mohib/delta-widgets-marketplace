@@ -88,30 +88,34 @@ const Tag = async (props: PageProps<"/tags/[slug]">) => {
           ) wv ON w.id = wv.widget_id`,
       )
       .join({ p: Table.UserProfiles }, "w.author_id", "p.user_id")
-      .whereIn(
-        "wv.id",
-        models
-          .WidgetVersionCategories()
-          .select("widget_version_id")
-          .where((q) => {
-            if (tag) q.where("category_id", tag.id);
-          }),
-      )
+      .where((q) => {
+        if (tag) {
+          q.whereIn(
+            "wv.id",
+            models
+              .WidgetVersionCategories()
+              .select("widget_version_id")
+              .where("category_id", tag.id),
+          );
+        }
+      })
       .orderBy("w.created_at", "desc")
       .limit(limit)
       .offset(offset) as unknown as WidgetWithCreator[],
     models
       .WidgetVersions("wv")
       .count("id")
-      .whereIn(
-        "wv.id",
-        models
-          .WidgetVersionCategories()
-          .select("widget_version_id")
-          .where((q) => {
-            if (tag) q.where("category_id", tag.id);
-          }),
-      )
+      .where((q) => {
+        if (tag) {
+          q.whereIn(
+            "wv.id",
+            models
+              .WidgetVersionCategories()
+              .select("widget_version_id")
+              .where("category_id", tag.id),
+          );
+        }
+      })
       .andWhere("wv.status", "PUBLISHED")
       .first(),
   ]);
