@@ -30,23 +30,24 @@ const useClasses = makeStyles({
     alignItems: "center",
     justifyContent: "center",
   },
-  image: {
-    width: "100%",
-    maxHeight: "clamp(200px, 50vh, 400px)",
-    objectFit: "scale-down",
-  },
 });
 
 const ImageCard: React.FC<{ url: string; hidden?: boolean }> = (props) => {
-  const classes = useClasses();
   const { url } = props;
 
   return (
     <Image
-      className={classes.image}
       src={url}
       role="presentation"
-      style={props.hidden ? { display: "none" } : {}}
+      style={
+        props.hidden
+          ? { display: "none" }
+          : {
+              width: "100%",
+              maxHeight: "clamp(200px, 50vh, 400px)",
+              objectFit: "scale-down",
+            }
+      }
     />
   );
 };
