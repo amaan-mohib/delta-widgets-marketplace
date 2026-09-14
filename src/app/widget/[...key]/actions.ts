@@ -276,3 +276,15 @@ export const auditAction = async (
     throw new Error("Something went wrong while adding audit");
   }
 };
+
+export const updateDownloadCount = async (
+  id: number,
+  key: string,
+  version?: string | null,
+) => {
+  await models.Widgets().where("id", id).increment("download_count", 1);
+  updateTag(`widget-${key}`);
+  if (version) {
+    updateTag(`widget-${key}-${version}`);
+  }
+};

@@ -50,6 +50,7 @@ const WidgetPage = async (props: PageProps<"/widget/[...key]">) => {
           version={selectedVersion}
           versions={versions}
           tags={tags}
+          assets={assets}
         />
         <Description description={selectedVersion.description || ""} />
         {selectedVersion.changelog && (

@@ -25,7 +25,9 @@ const UploadPage: React.FC<UploadPageProps> = () => {
 
     commands.getAllWidgets({ dir: "widgets" }).then((widgets) => {
       const filtered = widgets.filter(
-        (item) => !(item.manifest.key in templateWidgets),
+        (item) =>
+          !(item.manifest.key in templateWidgets) ||
+          item.manifest.isGalleryWidget,
       );
       setWidgets(filtered);
     });

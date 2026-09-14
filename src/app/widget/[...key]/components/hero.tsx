@@ -1,13 +1,13 @@
 "use client";
 
-import { UserProfiles, Widgets, WidgetVersions } from "@/lib/db";
+import { Assets, UserProfiles, Widgets, WidgetVersions } from "@/lib/db";
 import {
   Badge,
   Body1,
   Button,
   Divider,
   Select,
-  Text,
+  Spinner,
   Title1,
   tokens,
   Tooltip,
@@ -24,10 +24,32 @@ import {
 import { getStatusText } from "@/lib/utils";
 import { useAuth } from "@/store/use-auth";
 import { useDataStore } from "@/store/use-data-store";
-import { getIfUserLiked, likeAction } from "../actions";
+import { getIfUserLiked, likeAction, updateDownloadCount } from "../actions";
 import { usePathname, useRouter } from "next/navigation";
-import { getDonationLinks } from "@/app/actions";
 import DonationDialog from "@/components/donation-dialog";
+import { DEEP_LINK_BASE_URL } from "@/lib/constants";
+import { commands, IDownloadWidgetParams } from "@/lib/commands";
+import { path } from "@tauri-apps/api";
+import { appDataDir } from "@tauri-apps/api/path";
+import { exists, readTextFile } from "@tauri-apps/plugin-fs";
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+
+const getInstalledStatus = async (key: string, version?: string | null) => {
+  const widgetDir = await path.join(
+    await appDataDir(),
+    "widgets",
+    key,
+    "manifest.json",
+  );
+  if (await exists(widgetDir)) {
+    const manifest = JSON.parse(await readTextFile(widgetDir));
+    return {
+      installed: true,
+      needsUpdate: manifest.version !== version,
+    };
+  }
+  return { installed: false, needsUpdate: false };
+};
 
 interface HeroProps {
   widget: Widgets;
@@ -37,6 +59,7 @@ interface HeroProps {
   version: Partial<WidgetVersions>;
   versions: string[];
   tags: string[];
+  assets: Assets[];
 }
 
 const Hero: React.FC<HeroProps> = ({
@@ -47,13 +70,20 @@ const Hero: React.FC<HeroProps> = ({
   version,
   versions,
   tags,
+  assets,
 }) => {
   const [liked, setLiked] = useState(false);
   const [likesNum, setLikesNum] = useState(likes);
   const { user } = useAuth();
   const clientId = useDataStore((s) => s.clientId);
+  const isInApp = useDataStore((s) => s.isInApp);
   const [visibleTooltip, setVisibleTooltip] = useState(false);
   const [open, setOpen] = useState(false);
+  const [installStatus, setInstallStatus] = useState({
+    installed: false,
+    needsUpdate: false,
+  });
+  const [installing, setInstalling] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -69,6 +99,21 @@ const Hero: React.FC<HeroProps> = ({
     });
   }, [user, clientId]);
 
+  useEffect(() => {
+    if (!isInApp) return;
+
+    setInstalling(true);
+    getInstalledStatus(widget.key.replace(/\//g, "-"), version.version)
+      .then((data) => {
+        setInstallStatus(data);
+        setInstalling(false);
+      })
+      .catch((e) => {
+        console.error(e);
+        setInstalling(false);
+      });
+  }, [isInApp, version]);
+
   const onLike = async () => {
     if (!user && !clientId) return;
 
@@ -81,6 +126,54 @@ const Hero: React.FC<HeroProps> = ({
       anon_id: clientId,
       user_id: user?.id,
     });
+  };
+
+  const onInstall = async () => {
+    if (version.status !== "PUBLISHED" || installing) return;
+    if (!isInApp) {
+      window.open(`${DEEP_LINK_BASE_URL}install?key=${widget.key}`);
+      return;
+    }
+
+    try {
+      if (installStatus.installed && !installStatus.needsUpdate) {
+        const mainWindow = await WebviewWindow.getByLabel("main");
+        mainWindow?.show();
+        mainWindow?.setFocus();
+        return;
+      }
+      setInstalling(true);
+      const files: IDownloadWidgetParams["files"] = {
+        manifest: "",
+        assets: null,
+        thumb: null,
+      };
+      assets.forEach((item) => {
+        if (item.asset_type === "MANIFEST") {
+          files.manifest = process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + item.src;
+        }
+        if (item.asset_type === "WIDGET_ASSET") {
+          files.assets = process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + item.src;
+        }
+        if (
+          item.asset_type === "SCREENSHOT" &&
+          item.src.endsWith("thumb.png")
+        ) {
+          files.thumb = process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + item.src;
+        }
+      });
+      await commands.downloadWidget({
+        key: widget.key.replace(/\//g, "-"),
+        rawKey: widget.key,
+        files,
+      });
+      await updateDownloadCount(widget.id, widget.key, version.version);
+      setInstalling(false);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to install widget");
+      setInstalling(false);
+    }
   };
 
   return (
@@ -146,11 +239,18 @@ const Hero: React.FC<HeroProps> = ({
       </div>
       <div className="flex items-center gap-2 mt-5">
         <Button
-          disabled={version.status !== "PUBLISHED"}
+          disabled={version.status !== "PUBLISHED" || installing}
           appearance="primary"
           size="large"
-          icon={<ArrowDownloadRegular />}>
-          <span>Install</span>
+          icon={installing ? <Spinner size="tiny" /> : <ArrowDownloadRegular />}
+          onClick={onInstall}>
+          <span>
+            {installStatus.installed
+              ? installStatus.needsUpdate
+                ? "Update"
+                : "Open"
+              : "Install"}
+          </span>
           {Number(widget.download_count ?? 0) > 0 && (
             <>
               <Divider vertical className="mx-2" appearance="brand" />
