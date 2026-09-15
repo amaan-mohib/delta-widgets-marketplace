@@ -39,7 +39,9 @@ export const getWidget = cache(
       .WidgetVersions()
       .where("widget_id", widget.id)
       .orderBy("revision", "desc");
-    const approvedVersion = versions.find((v) => v.status === "PUBLISHED");
+    const approvedVersion = versions.find(
+      (v) => v.id === widget.latest_version_id,
+    );
     const isWidgetAuthor =
       isAdmin || (userId ? userId === widget.author_id : false);
     const latestVersion = isWidgetAuthor ? versions[0] : approvedVersion;
@@ -156,16 +158,51 @@ export const getAuditHistory = async (widget_version_id: number) => {
 
 const updateWidgetStatus = async (
   action: string,
-  id: number,
+  widgetVersion: WidgetVersions,
   trx: Knex.Transaction,
 ) => {
+  if (action === "PUBLISHED") {
+    const newerVersion = await models
+      .WidgetVersions()
+      .where("widget_id", widgetVersion.widget_id)
+      .andWhere("revision", ">=", widgetVersion.revision)
+      .andWhere("status", "PUBLISHED")
+      .first()
+      .transacting(trx);
+    if (newerVersion) {
+      throw new Error("A newer published version already exists");
+    } else {
+      await models
+        .Widgets()
+        .update({ latest_version_id: widgetVersion.id })
+        .where("id", widgetVersion.widget_id)
+        .transacting(trx);
+    }
+  } else if (widgetVersion.status === "PUBLISHED") {
+    const latestPublishedVersion = await models
+      .WidgetVersions()
+      .where("widget_id", widgetVersion.widget_id)
+      .where("status", "PUBLISHED")
+      .whereNot("id", widgetVersion.id)
+      .orderBy("revision", "desc")
+      .first()
+      .transacting(trx);
+
+    await models
+      .Widgets()
+      .where("id", widgetVersion.widget_id)
+      .update({
+        latest_version_id: latestPublishedVersion?.id ?? null,
+      })
+      .transacting(trx);
+  }
   await models
     .WidgetVersions()
     .update({
       status: action === "REQUESTED_CHANGE" ? "IN_REVIEW" : action,
       published_at: action === "PUBLISHED" ? trx.fn.now() : null,
     })
-    .where("id", id)
+    .where("id", widgetVersion.id)
     .transacting(trx);
 };
 
@@ -252,7 +289,7 @@ export const auditAction = async (
       })
       .transacting(trx);
     if (action !== "COMMENT") {
-      await updateWidgetStatus(action, widgetVersion.id, trx);
+      await updateWidgetStatus(action, widgetVersion, trx);
       const olderVersions = await suspendOlderWidgets(
         action,
         widgetVersion,

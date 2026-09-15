@@ -4,7 +4,7 @@ import models from "@/lib/db/models";
 import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [tags, widgets] = await Promise.all([
+  const [tags, widgets, creators] = await Promise.all([
     models
       .Categories()
       .select("slug", "updated_at")
@@ -13,25 +13,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     models
       .Widgets("w")
       .select("w.id", "w.key", "w.published_at")
-      .joinRaw(
-        `JOIN (
-          SELECT DISTINCT ON (widget_id) *
-          FROM ${Table.WidgetVersions}
-          WHERE status = 'PUBLISHED'
-            ORDER BY widget_id, created_at DESC
-          ) wv ON w.id = wv.widget_id`,
-      )
+      .join({ wv: Table.WidgetVersions }, "wv.id", "w.latest_version_id")
+      .where("wv.status", "PUBLISHED")
       .orderBy("w.created_at", "desc"),
+    models
+      .UserProfiles("p")
+      .select("p.username")
+      .max("w.updated_at as updated_at")
+      .join({ w: Table.Widgets }, "w.author_id", "p.user_id")
+      .whereNotNull("w.latest_version_id")
+      .groupBy("p.username") as unknown as any[],
   ]);
-
-  const creators = await models
-    .UserProfiles("p")
-    .distinct("p.username", "p.updated_at")
-    .join({ w: Table.Widgets }, "w.author_id", "p.user_id")
-    .whereIn(
-      "w.id",
-      widgets.map((i) => i.id),
-    );
 
   return [
     {

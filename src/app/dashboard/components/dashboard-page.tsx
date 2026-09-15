@@ -95,7 +95,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             { title: likes, description: "Total likes" },
             { title: downloads, description: "Total downloads" },
           ].map((item) => (
-            <Card appearance="outline" key={item.title}>
+            <Card appearance="outline" key={item.description}>
               <CardPreview className="px-3 h-full">
                 <Display>{item.title}</Display>
               </CardPreview>

@@ -163,8 +163,7 @@ const Hero: React.FC<HeroProps> = ({
         }
       });
       await commands.downloadWidget({
-        key: widget.key.replace(/\//g, "-"),
-        rawKey: widget.key,
+        key: widget.key,
         files,
       });
       await updateDownloadCount(widget.id, widget.key, version.version);

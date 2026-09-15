@@ -44,7 +44,7 @@ export const getUserWidgets = async (page: number, pageSize?: number) => {
         `JOIN (
             SELECT DISTINCT ON (widget_id) *
             FROM ${Table.WidgetVersions}
-            ORDER BY widget_id, created_at DESC
+            ORDER BY widget_id, revision DESC
           ) wv ON w.id = wv.widget_id`,
       )
       .where("w.author_id", user.id)

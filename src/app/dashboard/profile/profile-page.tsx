@@ -21,7 +21,7 @@ import {
   DismissRegular,
 } from "@fluentui/react-icons";
 import React, { useRef, useState } from "react";
-import { addDonationLink } from "./actions";
+import { addDonationLink, getPhotoPresignedUrl } from "./actions";
 
 interface ProfilePageProps {}
 
@@ -30,29 +30,34 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
   const [editName, setEditName] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [link, setLink] = useState("");
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
 
   const updateName = async () => {
-    if (!inputRef.current) return;
-    const value = (inputRef.current.value || "").trim();
-    if (!value) return;
-    if (value === user?.name) {
-      setEditName(false);
-      return;
-    }
-    authClient
-      .updateUser({ name: value })
-      .then(() => {
-        if (user && user.id) {
-          useAuth.setState({
-            user: {
-              ...user,
-              name: value,
-            },
-          });
-        }
+    if (!inputRef.current || !user) return;
+    setLoading(true);
+    try {
+      const value = (inputRef.current.value || "").trim();
+      if (!value) return;
+      if (value === user?.name) {
         setEditName(false);
-      })
-      .catch(console.error);
+        return;
+      }
+      await authClient.updateUser({ name: value });
+
+      useAuth.setState({
+        user: {
+          ...user,
+          name: value,
+        },
+      });
+      setEditName(false);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update name");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addLink = async () => {
@@ -97,6 +102,48 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
     }
   };
 
+  const updatePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const file = e.target.files && e.target.files[0];
+      if (!file || !profile?.username) return;
+      if (file.size > 5e6) {
+        throw new Error("Image size must be less 5 MB");
+      }
+      const { uploadUrl, photoUrl } = await getPhotoPresignedUrl(
+        profile.username,
+        file.name,
+        file.type,
+      );
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      });
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      await authClient.updateUser({ image: photoUrl });
+
+      useAuth.setState({
+        user: {
+          ...user,
+          image: photoUrl,
+        },
+      });
+    } catch (error: any) {
+      alert(error.message || "Failed to upload photo");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!user) {
     return null;
   }
@@ -106,11 +153,24 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
       <div>
         <Title1>Profile</Title1>
         <div className="flex gap-5 py-5">
-          <div>
+          <div className="flex flex-col items-center justify-center gap-3">
             <Avatar
               image={{ src: user.image || undefined }}
               name={user.name}
               size={128}
+            />
+            <Link
+              as="button"
+              onClick={() => uploadRef.current?.click()}
+              disabled={loading}>
+              Change photo
+            </Link>
+            <input
+              ref={uploadRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={updatePhoto}
             />
           </div>
           <div className="pl-5 border-l flex flex-col gap-2 flex-1 max-w-lg">
@@ -123,10 +183,15 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                     defaultValue={user.name}
                     autoFocus
                   />
-                  <Button onClick={updateName} icon={<CheckmarkRegular />} />
+                  <Button
+                    onClick={updateName}
+                    icon={<CheckmarkRegular />}
+                    disabled={loading}
+                  />
                   <Button
                     onClick={() => setEditName(false)}
                     icon={<DismissRegular />}
+                    disabled={loading}
                   />
                 </div>
               ) : (

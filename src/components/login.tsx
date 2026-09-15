@@ -1,15 +1,25 @@
 "use client";
 
 import { handleOAuthSignIn } from "@/lib/auth/client";
+import { useAuth } from "@/store/use-auth";
 import { Button, Title1 } from "@fluentui/react-components";
 import { IconBrandGithub, IconBrandGoogleFilled } from "@tabler/icons-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 interface LoginProps {}
 
 const LoginPage: React.FC<LoginProps> = () => {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const callback = searchParams.get("redirect");
+  const router = useRouter();
+
+  useEffect(() => {
+    if (callback && user) {
+      router.replace(callback);
+    }
+  }, [callback, user]);
 
   return (
     <main className="container mx-auto px-4 sm:px-6 lg:px-8">

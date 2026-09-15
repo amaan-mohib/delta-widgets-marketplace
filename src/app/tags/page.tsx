@@ -28,14 +28,8 @@ const TagListPage = async (props: PageProps<"/tags">) => {
     models.Categories().where("count", ">", 0).count("id").first(),
     (await models
       .Widgets("w")
-      .joinRaw(
-        `JOIN (
-            SELECT DISTINCT ON (widget_id) *
-            FROM ${Table.WidgetVersions}
-            WHERE status = 'PUBLISHED'
-            ORDER BY widget_id, created_at DESC
-          ) wv ON w.id = wv.widget_id`,
-      )
+      .join({ wv: Table.WidgetVersions }, "wv.id", "w.latest_version_id")
+      .where("wv.status", "PUBLISHED")
       .count("w.id")
       .first()) as any,
   ]);

@@ -89,15 +89,9 @@ export const getWidgets = async (
         .select("a.src")
         .as("screenshot_src"),
     )
-    .joinRaw(
-      `JOIN (
-              SELECT DISTINCT ON (widget_id) *
-              FROM ${Table.WidgetVersions}
-              WHERE status = 'PUBLISHED'
-              ORDER BY widget_id, created_at DESC
-            ) wv ON w.id = wv.widget_id`,
-    )
     .join({ p: Table.UserProfiles }, "p.user_id", "w.author_id")
+    .join({ wv: Table.WidgetVersions }, "wv.id", "w.latest_version_id")
+    .where("wv.status", "PUBLISHED")
     .orderBy(`w.${sortBy}`, "desc")
     .limit(20);
 

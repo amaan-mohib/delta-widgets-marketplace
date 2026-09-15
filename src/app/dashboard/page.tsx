@@ -19,59 +19,36 @@ const Dashboard = async () => {
     redirect(`/login?redirect=/dashboard`);
   }
 
-  const widgets = await models
-    .Widgets("w")
-    .select(
-      "w.id",
-      "wv.status",
-      "w.likes",
-      "w.download_count",
-      "wv.id as version_id",
-    )
-    .joinRaw(
-      `JOIN (
-            SELECT DISTINCT ON (widget_id) *
-            FROM ${Table.WidgetVersions}
-            WHERE status IN ('PUBLISHED', 'IN_REVIEW')
-            ORDER BY widget_id, created_at DESC
-          ) wv ON w.id = wv.widget_id`,
-    )
-    .where("w.author_id", user.id);
-
-  const requested = await models
-    .WidgetAudits("wa")
-    .select(
-      "wa.id",
-      "wa.widget_version_id",
-      "wv.version",
-      "wa.notes",
-      "w.key",
-      "wv.label",
-      "wa.created_at",
-    )
-    .join({ wv: Table.WidgetVersions }, "wv.id", "wa.widget_version_id")
-    .join({ w: Table.Widgets }, "w.id", "wv.widget_id")
-    .where("action", "REQUESTED_CHANGE")
-    .whereIn(
-      "widget_version_id",
-      widgets.map((item) => item.version_id),
-    )
-    .orderBy("wa.created_at", "desc");
-
-  let publishedCount = 0;
-  let inReviewCount = 0;
-  let likes = 0;
-  let downloads = 0;
-  widgets.forEach((item) => {
-    if (item.status === "PUBLISHED") {
-      publishedCount++;
-      likes += Number(item.likes ?? 0);
-      downloads += Number(item.download_count ?? 0);
-    }
-    if (item.status === "IN_REVIEW") {
-      inReviewCount++;
-    }
-  });
+  const [publishedWidgets, inReviewWidgets, requested] = await Promise.all([
+    models
+      .Widgets("w")
+      .count({ published_count: "w.id" })
+      .sum({ likes: "w.likes", downloads: "w.download_count" })
+      .join({ wv: Table.WidgetVersions }, "wv.id", "w.latest_version_id")
+      .where({ "wv.status": "PUBLISHED", "w.author_id": user.id })
+      .first(),
+    models
+      .WidgetVersions("wv")
+      .countDistinct({ count: "widget_id" })
+      .join({ w: Table.Widgets }, "wv.widget_id", "w.id")
+      .where({ "wv.status": "IN_REVIEW", "w.author_id": user.id })
+      .first(),
+    models
+      .WidgetAudits("wa")
+      .select(
+        "wa.id",
+        "wa.widget_version_id",
+        "wv.version",
+        "wa.notes",
+        "w.key",
+        "wv.label",
+        "wa.created_at",
+      )
+      .join({ wv: Table.WidgetVersions }, "wv.id", "wa.widget_version_id")
+      .join({ w: Table.Widgets }, "w.id", "wv.widget_id")
+      .where({ "wa.action": "REQUESTED_CHANGE", "w.author_id": user.id })
+      .orderBy("wa.created_at", "desc"),
+  ]);
 
   return (
     <>
@@ -80,7 +57,13 @@ const Dashboard = async () => {
         <DashboardSidebar activeTab="dashboard" />
         <div className="flex-1 p-3">
           <DashboardPage
-            {...{ publishedCount, inReviewCount, likes, downloads, requested }}
+            {...{
+              publishedCount: Number(publishedWidgets?.published_count ?? 0),
+              inReviewCount: Number(inReviewWidgets?.count ?? 0),
+              likes: Number(publishedWidgets?.likes ?? 0),
+              downloads: Number(publishedWidgets?.downloads ?? 0),
+              requested,
+            }}
           />
         </div>
       </main>

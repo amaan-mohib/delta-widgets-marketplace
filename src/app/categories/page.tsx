@@ -55,14 +55,8 @@ const CategoryListPage = async (props: PageProps<"/categories">) => {
         .select("a.src")
         .as("screenshot_src"),
     )
-    .joinRaw(
-      `JOIN (
-            SELECT DISTINCT ON (widget_id) *
-            FROM ${Table.WidgetVersions}
-            WHERE status = 'PUBLISHED'
-            ORDER BY widget_id, created_at DESC
-          ) wv ON w.id = wv.widget_id`,
-    )
+    .join({ wv: Table.WidgetVersions }, "wv.id", "w.latest_version_id")
+    .where("wv.status", "PUBLISHED")
     .join({ p: Table.UserProfiles }, "w.author_id", "p.user_id")
     .join({ c: Table.WidgetVersionCategories }, "wv.id", "c.widget_version_id")
     .whereIn(
