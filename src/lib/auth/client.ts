@@ -14,6 +14,7 @@ export const handleOAuthSignIn = async (
       callbackURL: callbackURL || "/dashboard",
       newUserCallbackURL: "/dashboard/welcome",
       errorCallbackURL: "/error",
+      additionalData: { prompt: "select_account" }, // doesn't work
     });
   } catch (error) {
     console.error("OAuth sign-in error:", error);

@@ -4,8 +4,8 @@ import {
   Avatar,
   Button,
   Menu,
+  MenuDivider,
   MenuItem,
-  MenuItemLink,
   MenuList,
   MenuPopover,
   MenuTrigger,
@@ -36,28 +36,23 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
         {userLoading ? (
           <Spinner size="tiny" />
         ) : user ? (
-          <Button as="a" href="/dashboard">
-            Dashboard
-          </Button>
+          <Link href="/dashboard">
+            <Button>Dashboard</Button>
+          </Link>
         ) : (
-          <Button
-            as="a"
-            appearance="subtle"
-            href="/login"
-            style={{ minWidth: "fit-content" }}>
-            Login
-          </Button>
+          <Link href="/login">
+            <Button appearance="subtle" style={{ minWidth: "fit-content" }}>
+              Login
+            </Button>
+          </Link>
         )}
         {isInApp ? (
           !isUpload && (
-            <Button
-              key="upload"
-              as="a"
-              appearance="primary"
-              href="/dashboard/upload"
-              icon={<IconUpload />}>
-              Upload
-            </Button>
+            <Link href="/dashboard/upload">
+              <Button key="upload" appearance="primary" icon={<IconUpload />}>
+                Upload
+              </Button>
+            </Link>
           )
         ) : (
           <Button key="get-app" as="a" href="https://deltawidgets.com/download">
@@ -83,10 +78,18 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
               </MenuTrigger>
               <MenuPopover>
                 <MenuList>
+                  <Link href={"/dashboard"}>
+                    <MenuItem subText={user.email}>{user.name}</MenuItem>
+                  </Link>
+                  <MenuDivider />
                   {user.role === "admin" && (
-                    <MenuItemLink href="/dashboard/admin">Admin</MenuItemLink>
+                    <Link href="/dashboard/admin">
+                      <MenuItem>Admin</MenuItem>
+                    </Link>
                   )}
-                  <MenuItemLink href="/dashboard/profile">Profile</MenuItemLink>
+                  <Link href="/dashboard/profile">
+                    <MenuItem>Profile</MenuItem>
+                  </Link>
                   <MenuItem
                     onClick={async () => {
                       await authClient.signOut();

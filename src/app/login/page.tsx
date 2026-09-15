@@ -10,9 +10,11 @@ export const metadata: Metadata = {
 const Login = async () => {
   return (
     <RootLayout>
-      <Suspense>
-        <LoginPage />
-      </Suspense>
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <Suspense>
+          <LoginPage />
+        </Suspense>
+      </main>
     </RootLayout>
   );
 };
