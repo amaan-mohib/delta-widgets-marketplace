@@ -2,6 +2,7 @@
 
 import WidgetPreview from "@/components/widget-preview";
 import { IGetAllWidget } from "@/lib/commands";
+import { focusMainWindow } from "@/lib/utils";
 import { useUploadStore } from "@/store/use-upload-store";
 import {
   Body1Strong,
@@ -13,6 +14,7 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import { AppsAddInRegular } from "@fluentui/react-icons";
+import { emitTo } from "@tauri-apps/api/event";
 import { useMemo } from "react";
 
 interface UploadListProps {
@@ -88,7 +90,10 @@ const UploadList: React.FC<UploadListProps> = ({ widgets }) => {
         <Card
           appearance="filled-alternative"
           className="min-h-42.5"
-          onClick={() => {}}>
+          onClick={async () => {
+            await focusMainWindow();
+            await emitTo("main", "create");
+          }}>
           <div
             style={{
               display: "flex",

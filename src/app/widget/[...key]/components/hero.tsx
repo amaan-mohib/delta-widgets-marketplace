@@ -21,7 +21,7 @@ import {
   RibbonStarRegular,
   ShareRegular,
 } from "@fluentui/react-icons";
-import { getStatusText } from "@/lib/utils";
+import { focusMainWindow, getStatusText } from "@/lib/utils";
 import { useAuth } from "@/store/use-auth";
 import { useDataStore } from "@/store/use-data-store";
 import { getIfUserLiked, likeAction, updateDownloadCount } from "../actions";
@@ -32,7 +32,7 @@ import { commands, IDownloadWidgetParams } from "@/lib/commands";
 import { path } from "@tauri-apps/api";
 import { appDataDir } from "@tauri-apps/api/path";
 import { exists, readTextFile } from "@tauri-apps/plugin-fs";
-import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { emitTo } from "@tauri-apps/api/event";
 
 const getInstalledStatus = async (key: string, version?: string | null) => {
   const widgetDir = await path.join(
@@ -137,9 +137,8 @@ const Hero: React.FC<HeroProps> = ({
 
     try {
       if (installStatus.installed && !installStatus.needsUpdate) {
-        const mainWindow = await WebviewWindow.getByLabel("main");
-        mainWindow?.show();
-        mainWindow?.setFocus();
+        await focusMainWindow();
+        await emitTo("main", "focus-widget", widget.key);
         return;
       }
       setInstalling(true);

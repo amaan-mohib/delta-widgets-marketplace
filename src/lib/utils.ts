@@ -4,6 +4,7 @@ import { readTextFile } from "@tauri-apps/plugin-fs";
 import { IWidget } from "./types/manifest";
 import { commands } from "./commands";
 import { path } from "@tauri-apps/api";
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 
 export const cloneObject = <T>(obj: T) => {
   return JSON.parse(JSON.stringify(obj)) as T;
@@ -113,4 +114,10 @@ export const getStore = async () => {
 export const getClientId = async () => {
   const store = await getStore();
   return store.clientId as string | undefined;
+};
+
+export const focusMainWindow = async () => {
+  const mainWindow = await WebviewWindow.getByLabel("main");
+  mainWindow?.show();
+  mainWindow?.setFocus();
 };
