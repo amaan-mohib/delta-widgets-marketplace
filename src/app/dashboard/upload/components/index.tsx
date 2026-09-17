@@ -28,13 +28,15 @@ const UploadPage: React.FC<UploadPageProps> = () => {
     const init = async () => {
       try {
         const widgets = await commands.getAllWidgets({ dir: "widgets" });
-        const filtered = widgets.filter(
-          (item) =>
-            !(
-              item.manifest.key in templateWidgets ||
-              item.manifest.isGalleryWidget
-            ),
-        );
+        const filtered = widgets
+          .filter(
+            (item) =>
+              !(
+                item.manifest.key in templateWidgets ||
+                item.manifest.isGalleryWidget
+              ),
+          )
+          .sort((a, b) => a.manifest.label.localeCompare(b.manifest.label));
         setWidgets(filtered);
 
         const preselectedKeys = searchParams.getAll("key");
