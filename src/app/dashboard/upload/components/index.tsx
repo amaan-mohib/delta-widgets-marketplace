@@ -12,6 +12,7 @@ import UploadFormFooter from "./form/form-footer";
 import { commands, IGetAllWidget } from "@/lib/commands";
 import RootLayout from "@/components/root-layout";
 import { useUploadStore } from "@/store/use-upload-store";
+import { useSearchParams } from "next/navigation";
 
 interface UploadPageProps {}
 
@@ -19,25 +20,43 @@ const UploadPage: React.FC<UploadPageProps> = () => {
   const [widgets, setWidgets] = useState<IGetAllWidget[]>([]);
   const { isInApp } = useDataStore();
   const uploadStep = useUploadStore((s) => s.uploadStep);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!isInApp) return;
 
-    commands.getAllWidgets({ dir: "widgets" }).then((widgets) => {
-      const filtered = widgets.filter(
-        (item) =>
-          !(item.manifest.key in templateWidgets) ||
-          item.manifest.isGalleryWidget,
-      );
-      setWidgets(filtered);
-    });
-    useUploadStore.setState({
-      uploadStep: "select",
-      widgetUploads: {},
-      selectedWidgets: [],
-      selectedWidget: null,
-    });
-  }, [isInApp]);
+    const init = async () => {
+      try {
+        const widgets = await commands.getAllWidgets({ dir: "widgets" });
+        const filtered = widgets.filter(
+          (item) =>
+            !(
+              item.manifest.key in templateWidgets ||
+              item.manifest.isGalleryWidget
+            ),
+        );
+        setWidgets(filtered);
+
+        const preselectedKeys = searchParams.getAll("key");
+        useUploadStore.setState({
+          uploadStep: "select",
+          widgetUploads: {},
+          selectedWidgets:
+            preselectedKeys.length > 0
+              ? filtered.filter((item) =>
+                  preselectedKeys.includes(item.manifest.key),
+                )
+              : [],
+          selectedWidget: null,
+        });
+      } catch (error) {
+        alert("Something went wrong while fetching widgets");
+        console.error(error);
+      }
+    };
+
+    init();
+  }, [isInApp, searchParams]);
 
   if (!isInApp) {
     return (
