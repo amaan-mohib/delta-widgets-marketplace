@@ -4,9 +4,14 @@ import { getExistingVersions } from "@/app/dashboard/upload/actions";
 import { IFormError } from "@/app/dashboard/upload/components/form/utils";
 import { IGetAllWidget } from "@/lib/commands";
 import { WidgetVersions } from "@/lib/db";
-import { IUploadManifest, IWidget } from "@/lib/types/manifest";
+import {
+  ICustomAssets,
+  IUploadManifest,
+  IWidget,
+  IWidgetElement,
+} from "@/lib/types/manifest";
 import { getManifestFromPath, getUrlThumbnailPath } from "@/lib/utils";
-import { exists, lstat } from "@tauri-apps/plugin-fs";
+import { exists, lstat, writeTextFile } from "@tauri-apps/plugin-fs";
 
 export interface IUploadState {
   state: "DRAFT" | "UPLOADING" | "UPLOADED" | "WARNING";
@@ -61,6 +66,30 @@ export const getWidgetScreenshots = async (
   return screenshots;
 };
 
+const extractImageData = (
+  elements: IWidgetElement[],
+  assets: ICustomAssets[] = [],
+) => {
+  elements.forEach((el) => {
+    if (el.data?.imageData && el.data?.imageData?.kind === "file") {
+      if (
+        !assets.find(
+          (i) =>
+            i.path === el.data?.imageData.path &&
+            i.key === el.data?.imageData.key,
+        )
+      ) {
+        assets.push(el.data.imageData);
+      }
+      el.data.imageData.path = `./${el.data.imageData.key}`;
+    }
+    if (el.children) {
+      extractImageData(el.children, assets);
+    }
+  });
+  return assets;
+};
+
 export const initializeWidget = async (widget: IGetAllWidget) => {
   const [
     manifest,
@@ -91,6 +120,15 @@ export const initializeWidget = async (widget: IGetAllWidget) => {
     changelog: versions.length > 0 ? "" : undefined,
     tags: tags.length > 0 ? tags.map((t) => t.slug) : [],
   };
+
+  const customAssets = extractImageData(
+    manifest.elements ?? [],
+    manifest.customAssets,
+  );
+  if (customAssets.length > 0) {
+    manifest.customAssets = customAssets;
+    await writeTextFile(widget.manifestPath, JSON.stringify(manifest, null, 2));
+  }
   const response: IUploadState = {
     state: "DRAFT",
     values,
