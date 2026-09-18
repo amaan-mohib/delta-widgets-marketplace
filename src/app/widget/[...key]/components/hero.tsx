@@ -25,7 +25,7 @@ import { focusMainWindow, getStatusText } from "@/lib/utils";
 import { useAuth } from "@/store/use-auth";
 import { useDataStore } from "@/store/use-data-store";
 import { getIfUserLiked, likeAction, updateDownloadCount } from "../actions";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import DonationDialog from "@/components/donation-dialog";
 import { DEEP_LINK_BASE_URL } from "@/lib/constants";
 import { commands, IDownloadWidgetParams } from "@/lib/commands";
@@ -86,6 +86,7 @@ const Hero: React.FC<HeroProps> = ({
   const [installing, setInstalling] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!user && !clientId) return;
@@ -102,17 +103,34 @@ const Hero: React.FC<HeroProps> = ({
   useEffect(() => {
     if (!isInApp) return;
 
-    setInstalling(true);
-    getInstalledStatus(widget.key.replace(/\//g, "-"), version.version)
-      .then((data) => {
+    const getStatus = async () => {
+      try {
+        setInstalling(true);
+        const data = await getInstalledStatus(
+          widget.key.replace(/\//g, "-"),
+          version.version,
+        );
         setInstallStatus(data);
         setInstalling(false);
-      })
-      .catch((e) => {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
         setInstalling(false);
-      });
+      }
+    };
+
+    getStatus();
   }, [isInApp, version]);
+
+  useEffect(() => {
+    if (!isInApp || installing) return;
+
+    const autoInstall = searchParams.get("install") === "true";
+    if (autoInstall) {
+      setTimeout(() => {
+        onInstall();
+      }, 1000);
+    }
+  }, [isInApp, searchParams, installing]);
 
   const onLike = async () => {
     if (!user && !clientId) return;
