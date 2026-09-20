@@ -15,6 +15,7 @@ import { getAuthUser } from "@/app/actions";
 import { IUploadManifest, IWidget } from "@/lib/types/manifest";
 import { Knex } from "knex";
 import { IUser } from "@/lib/types/auth";
+import { notifyWidgetUploaded } from "@/lib/emails";
 
 interface IUploadJob {
   fileName: string;
@@ -417,7 +418,19 @@ export const finalizeUpload = async (jobId: number) => {
         .transacting(trx),
     ]);
 
-    // TODO: send mail
+    const widget = await models
+      .WidgetVersions("wv")
+      .select("w.key", "wv.label", "wv.version", "u.name", "u.email")
+      .join({ w: Table.Widgets }, "wv.widget_id", "w.id")
+      .join({ u: Table.NeonAuthUser }, "w.author_id", "u.id")
+      .where("wv.id", widgetVersionId)
+      .first();
+    if (widget) {
+      await notifyWidgetUploaded(
+        { name: widget.name, email: widget.email },
+        { key: widget.key, label: widget.label, version: widget.version },
+      );
+    }
 
     await trx.commit();
   } catch (error) {

@@ -3,6 +3,7 @@
 import { getAuthUser } from "@/app/actions";
 import db, { Table, WidgetVersions } from "@/lib/db";
 import models from "@/lib/db/models";
+import { notifyWidgetStatusChanged } from "@/lib/emails";
 import { Knex } from "knex";
 import { cacheLife, cacheTag, updateTag } from "next/cache";
 import { cache } from "react";
@@ -305,7 +306,22 @@ export const auditAction = async (
       });
       updateTag(`widgets`);
     }
-    // TODO: send emails
+
+    const widget = await models
+      .WidgetVersions("wv")
+      .select("w.key", "wv.label", "wv.version", "u.name", "u.email")
+      .join({ w: Table.Widgets }, "wv.widget_id", "w.id")
+      .join({ u: Table.NeonAuthUser }, "w.author_id", "u.id")
+      .where("wv.id", widgetVersionId)
+      .first();
+    if (widget) {
+      await notifyWidgetStatusChanged(
+        { name: widget.name, email: widget.email },
+        { key: widget.key, label: widget.label, version: widget.version },
+        action,
+        notes,
+      );
+    }
     await trx.commit();
   } catch (error) {
     await trx.rollback();

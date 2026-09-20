@@ -72,13 +72,7 @@ const extractImageData = (
 ) => {
   elements.forEach((el) => {
     if (el.data?.imageData && el.data?.imageData?.kind === "file") {
-      if (
-        !assets.find(
-          (i) =>
-            i.path === el.data?.imageData.path &&
-            i.key === el.data?.imageData.key,
-        )
-      ) {
+      if (!assets.find((i) => i.key === el.data?.imageData.key)) {
         assets.push(el.data.imageData);
       }
       el.data.imageData.path = `./${el.data.imageData.key}`;
