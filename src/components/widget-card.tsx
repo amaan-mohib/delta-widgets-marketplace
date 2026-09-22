@@ -45,9 +45,7 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ widget, showStatus }) => {
         <CardPreview className="p-3 my-auto h-full">
           <img
             className="object-scale-down"
-            src={
-              process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + widget.screenshot_src
-            }
+            src={widget.screenshot_src}
             alt={widget.label}
             style={{ maxHeight: 150 }}
           />

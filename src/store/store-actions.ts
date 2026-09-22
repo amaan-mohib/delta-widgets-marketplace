@@ -106,7 +106,7 @@ export const initializeWidget = async (widget: IGetAllWidget) => {
       ...screenshots,
       ...existingScreenshots.map((ss) => ({
         fileName: ss.file_name,
-        path: `${process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX}${ss.src}`,
+        path: ss.src,
         fileSize: ss.size ?? 0,
         assetId: ss.id,
       })),

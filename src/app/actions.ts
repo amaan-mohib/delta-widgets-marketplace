@@ -1,58 +1,9 @@
 "use server";
+
 import { auth } from "@/lib/auth/server";
 import { Table, Widgets, WidgetVersions } from "@/lib/db";
 import models from "@/lib/db/models";
 import { connection } from "next/server";
-
-export const test = async () => {
-  const templates = [
-    {
-      key: "datetime",
-      label: "Date & Time",
-      creator: "deltawidgets",
-      views: 1213,
-      downloads: 1000,
-      thumbnail: "/templates/datetime/thumb.png",
-    },
-    {
-      key: "media",
-      label: "Date & Time",
-      creator: "deltawidgets",
-      views: 1213,
-      downloads: 1000,
-      thumbnail: "/templates/media/thumb.png",
-    },
-    {
-      key: "media-viz",
-      label: "Date & Time",
-      creator: "deltawidgets",
-      views: 1213,
-      downloads: 1000,
-      thumbnail: "/templates/media-viz/thumb.png",
-    },
-    {
-      key: "weather",
-      label: "Date & Time",
-      creator: "deltawidgets",
-      views: "1.2k",
-      downloads: "10k",
-      thumbnail: "/templates/weather/thumb.png",
-    },
-    {
-      key: "visualizer",
-      label: "Date & Time",
-      creator: "deltawidgets",
-      views: 1213,
-      downloads: 100000000,
-      thumbnail: "/templates/visualizer/thumb.png",
-    },
-  ];
-  return new Promise<typeof templates>((r) =>
-    setTimeout(() => {
-      return r(templates);
-    }, 100),
-  );
-};
 
 export const getWidgets = async (
   sortBy: "likes" | "published_at" | "download_count",

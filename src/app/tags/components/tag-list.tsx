@@ -69,10 +69,7 @@ const TagList: React.FC<TagListProps> = ({
                 {thumbMap[item.id] && (
                   <img
                     className="object-scale-down"
-                    src={
-                      process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX +
-                      thumbMap[item.id]
-                    }
+                    src={thumbMap[item.id]}
                     alt={item.name}
                     style={{ maxHeight: 150 }}
                   />

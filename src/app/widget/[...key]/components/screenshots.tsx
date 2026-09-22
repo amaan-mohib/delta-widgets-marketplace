@@ -81,11 +81,7 @@ const Screenshots: React.FC<ScreenshotsProps> = ({ screenshots }) => {
           borderRadius: "4px",
         }}>
         {screenshots.map((image, index) => (
-          <ImageCard
-            key={image.src}
-            url={process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + image.src}
-            hidden={index !== 0}
-          />
+          <ImageCard key={image.src} url={image.src} hidden={index !== 0} />
         ))}
       </div>
     );
@@ -97,12 +93,10 @@ const Screenshots: React.FC<ScreenshotsProps> = ({ screenshots }) => {
         <CarouselSlider>
           {screenshots.map((image, index) => (
             <CarouselCard
-              key={process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + image.src}
+              key={image.src}
               className={classes.card}
               aria-label={`${index + 1} of ${screenshots.length}`}>
-              <ImageCard
-                url={process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + image.src}
-              />
+              <ImageCard url={image.src} />
             </CarouselCard>
           ))}
         </CarouselSlider>

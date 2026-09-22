@@ -37,19 +37,13 @@ export async function generateMetadata(
       ...parentMeta.openGraph,
       title: selectedVersion.label,
       description,
-      images: [
-        ...(parentMeta.openGraph?.images || []),
-        process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + screenshot.src,
-      ],
+      images: [...(parentMeta.openGraph?.images || []), screenshot.src],
     },
     twitter: {
       ...parentMeta.twitter,
       title: selectedVersion.label,
       description,
-      images: [
-        ...(parentMeta.twitter?.images || []),
-        process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + screenshot.src,
-      ],
+      images: [...(parentMeta.twitter?.images || []), screenshot.src],
     },
   };
 }

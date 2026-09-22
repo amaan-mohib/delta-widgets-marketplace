@@ -57,11 +57,11 @@ const AssetsSection: React.FC<AssetsSectionProps> = ({ assets }) => {
                   </TableCellLayout>
                 </TableCell>
                 <TableCell>
-                  {humanStorageSize(item.size ?? 0)}
+                  {item.size ? humanStorageSize(item.size ?? 0) : "—"}
                   <TableCellActions>
                     <Button
                       as="a"
-                      href={process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + item.src}
+                      href={item.src}
                       target="_blank"
                       icon={<ArrowDownloadRegular />}
                       appearance="subtle"

@@ -1,7 +1,8 @@
 {
+  "alwaysOnTop": false,
   "dimensions": {
-    "width": 354,
-    "height": 103
+    "height": 83,
+    "width": 354
   },
   "elements": [
     {
@@ -48,6 +49,14 @@
     }
   ],
   "key": "disk",
-  "label": "disk",
+  "label": "Disk",
+  "pinned": false,
+  "position": {
+    "x": 30,
+    "y": 30
+  },
+  "published": true,
+  "publishedAt": 1755283514794,
+  "visible": false,
   "widgetType": "json"
 }

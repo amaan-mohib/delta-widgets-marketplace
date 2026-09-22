@@ -45,7 +45,7 @@ const getInstalledStatus = async (key: string, version?: string | null) => {
     const manifest = JSON.parse(await readTextFile(widgetDir));
     return {
       installed: true,
-      needsUpdate: manifest.version !== version,
+      needsUpdate: (manifest.version || "v1") !== version,
     };
   }
   return { installed: false, needsUpdate: false };
@@ -167,16 +167,16 @@ const Hero: React.FC<HeroProps> = ({
       };
       assets.forEach((item) => {
         if (item.asset_type === "MANIFEST") {
-          files.manifest = process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + item.src;
+          files.manifest = item.src;
         }
         if (item.asset_type === "WIDGET_ASSET") {
-          files.assets = process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + item.src;
+          files.assets = item.src;
         }
         if (
           item.asset_type === "SCREENSHOT" &&
           item.src.endsWith("thumb.png")
         ) {
-          files.thumb = process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + item.src;
+          files.thumb = item.src;
         }
       });
       await commands.downloadWidget({

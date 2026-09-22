@@ -28,7 +28,6 @@ interface HeaderProps {
 
 export function Header({ isDashboard, isUpload }: HeaderProps) {
   const { user, loading: userLoading } = useAuth();
-  const isInApp = useDataStore((state) => state.isInApp);
 
   const headerAction = useMemo(() => {
     return (
@@ -46,18 +45,12 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
             </Button>
           </Link>
         )}
-        {isInApp ? (
-          !isUpload && (
-            <Link href="/dashboard/upload">
-              <Button key="upload" appearance="primary" icon={<IconUpload />}>
-                Upload
-              </Button>
-            </Link>
-          )
-        ) : (
-          <Button key="get-app" as="a" href="https://deltawidgets.com/download">
-            Get {APP_NAME}
-          </Button>
+        {!isUpload && (
+          <Link href="/dashboard/upload">
+            <Button key="upload" appearance="primary" icon={<IconUpload />}>
+              Upload
+            </Button>
+          </Link>
         )}
         {user && (
           <>
@@ -104,7 +97,7 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
         )}
       </>
     );
-  }, [isInApp, user, userLoading]);
+  }, [user, userLoading]);
 
   return (
     <header
