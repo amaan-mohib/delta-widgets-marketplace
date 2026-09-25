@@ -40,6 +40,7 @@ exports.up = async function (knex) {
       key: "battery",
       dir: "battery",
       label: "Battery",
+      categories: ["system", "battery"],
       details:
         "Keeps an eye on your battery with a charge-level progress bar plus health and charge-cycle readouts.",
     },
@@ -47,6 +48,7 @@ exports.up = async function (knex) {
       key: "system",
       dir: "cpu",
       label: "System",
+      categories: ["system", "cpu"],
       details:
         "A live CPU monitor showing the current usage percentage plus your processor's model, clock speed, and logical core count.",
     },
@@ -54,6 +56,7 @@ exports.up = async function (knex) {
       key: "datetime",
       dir: "datetime",
       label: "Date & Time",
+      categories: ["date", "time", "clock"],
       details:
         "Shows the current time in 12-hour format alongside the full weekday and date. The layout is driven by date-fns tokens, so you can reformat it into anything from a bare clock to a full calendar line.",
     },
@@ -61,6 +64,7 @@ exports.up = async function (knex) {
       key: "disk",
       label: "Disk",
       dir: "disks",
+      categories: ["system", "disks", "storage"],
       details:
         "An overview of every drive's storage, showing used versus available space with a usage bar rendered per disk.",
     },
@@ -68,6 +72,7 @@ exports.up = async function (knex) {
       key: "media",
       label: "Media",
       dir: "media",
+      categories: ["media", "music"],
       details:
         "A now-playing panel with album artwork, track title and artist, a seek slider showing elapsed and total time, plus play, pause, and skip controls for whatever media is playing on your system.",
     },
@@ -75,6 +80,7 @@ exports.up = async function (knex) {
       key: "ram",
       label: "RAM",
       dir: "ram",
+      categories: ["system", "ram"],
       details:
         "A compact memory gauge showing used versus total RAM with a live progress bar.",
     },
@@ -89,7 +95,7 @@ exports.up = async function (knex) {
       key: "visualizer-delta-default",
       label: "Visualizer",
       dir: "visualizer",
-      categories: ["visualizer"],
+      categories: ["visualizer", "audio"],
       details:
         "A real-time bar visualizer that reacts to your system audio, with the current track's title and artist and a one-tap toggle to start or stop the capture.",
     },
@@ -97,7 +103,7 @@ exports.up = async function (knex) {
       key: "media-viz-delta-default",
       label: "Media Viz",
       dir: "media-viz",
-      categories: ["media", "visualizer"],
+      categories: ["media", "visualizer", "audio", "music"],
       details:
         "A now-playing panel with album artwork, track title and artist, a seek slider showing elapsed and total time, plus play, pause, and skip controls for whatever media is playing on your system along with an audio visualizer.",
     },

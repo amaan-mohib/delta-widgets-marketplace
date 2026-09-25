@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import AdminPage from "./audit-page";
+import Notifications from "./notifications";
 
 export const instant = false;
 
@@ -8,7 +9,12 @@ export const metadata: Metadata = {
 };
 
 const Admin = () => {
-  return <AdminPage />;
+  return (
+    <div>
+      <AdminPage />
+      <Notifications />
+    </div>
+  );
 };
 
 export default Admin;

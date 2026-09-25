@@ -15,6 +15,7 @@ export enum Table {
   Categories = "categories",
   KnexMigrations = "knex_migrations",
   KnexMigrationsLock = "knex_migrations_lock",
+  Notifications = "notifications",
   UploadJobFiles = "upload_job_files",
   UploadJobs = "upload_jobs",
   UserProfiles = "user_profiles",
@@ -42,6 +43,7 @@ export type Tables = {
   "categories": Categories,
   "knex_migrations": KnexMigrations,
   "knex_migrations_lock": KnexMigrationsLock,
+  "notifications": Notifications,
   "upload_job_files": UploadJobFiles,
   "upload_jobs": UploadJobs,
   "user_profiles": UserProfiles,
@@ -188,6 +190,15 @@ export type KnexMigrations = {
 export type KnexMigrationsLock = {
   index: number;
   is_locked: number | null;
+};
+
+export type Notifications = {
+  id: number;
+  title: string;
+  message: string;
+  link: string | null;
+  created_at: Date;
+  updated_at: Date;
 };
 
 export type UploadJobFiles = {
