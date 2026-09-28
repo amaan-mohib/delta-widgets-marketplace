@@ -1,6 +1,6 @@
 import Hero from "@/components/hero";
 import RootLayout from "@/components/root-layout";
-import { Table } from "@/lib/db";
+import db, { Table } from "@/lib/db";
 import models from "@/lib/db/models";
 import { WidgetWithCreator } from "@/lib/types/server";
 import { Suspense } from "react";
@@ -30,6 +30,25 @@ const CategoryListPage = async (props: PageProps<"/categories">) => {
   ]);
   const total = Number(totalRes?.count ?? 0);
   const tagsIds = tags.map((item) => item.id);
+
+  const rankedWidgets = models
+    .WidgetVersionCategories("wvc")
+    .select(
+      "wvc.category_id",
+      "wvc.widget_version_id",
+      db.raw(`
+      ROW_NUMBER() OVER (
+        PARTITION BY wvc.category_id
+        ORDER BY w.created_at DESC
+      ) AS row_num
+    `),
+    )
+    .join({ wv: Table.WidgetVersions }, "wv.id", "wvc.widget_version_id")
+    .join({ w: Table.Widgets }, "w.id", "wv.widget_id")
+    .whereIn("wvc.category_id", tagsIds)
+    .where("wv.status", "PUBLISHED")
+    .as("r");
+
   const widgets = await models
     .Widgets("w")
     .select(
@@ -44,7 +63,7 @@ const CategoryListPage = async (props: PageProps<"/categories">) => {
       "wv.version",
       "wv.status",
       "p.username as creator",
-      "c.category_id as category_id",
+      "r.category_id",
       models
         .Assets("a")
         .join({ wva: Table.WidgetVersionAssets }, "a.id", "wva.asset_id")
@@ -56,18 +75,11 @@ const CategoryListPage = async (props: PageProps<"/categories">) => {
         .as("screenshot_src"),
     )
     .join({ wv: Table.WidgetVersions }, "wv.id", "w.latest_version_id")
-    .where("wv.status", "PUBLISHED")
     .join({ p: Table.UserProfiles }, "w.author_id", "p.user_id")
-    .join({ c: Table.WidgetVersionCategories }, "wv.id", "c.widget_version_id")
-    .whereIn(
-      "wv.id",
-      models
-        .WidgetVersionCategories()
-        .select("widget_version_id")
-        .whereIn("category_id", tagsIds),
-    )
-    .orderBy("w.created_at", "desc")
-    .limit(10);
+    .join(rankedWidgets, "r.widget_version_id", "wv.id")
+    .where("r.row_num", "<=", 5)
+    .orderBy("r.category_id")
+    .orderBy("w.created_at", "desc");
   const widgetMap: Record<number, WidgetWithCreator[]> = {};
   widgets.forEach((widget) => {
     if (!widgetMap[widget.category_id]) {

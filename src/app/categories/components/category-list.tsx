@@ -8,18 +8,10 @@ import { WidgetWithCreator } from "@/lib/types/server";
 import {
   Body1Strong,
   Button,
-  Caption1,
   Card,
   CardPreview,
-  Text,
-  Title3,
-  tokens,
 } from "@fluentui/react-components";
-import {
-  ArrowLeftRegular,
-  ArrowRight16Regular,
-  ArrowRightRegular,
-} from "@fluentui/react-icons";
+import { ArrowRight16Regular } from "@fluentui/react-icons";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
