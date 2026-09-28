@@ -1,15 +1,25 @@
-"use cache";
+"use client";
 
-import { APP_NAME } from "@/lib/utils";
+import { APP_NAME } from "@/lib/constants";
+import { tokens } from "@fluentui/react-components";
 import {
   IconBrandDiscord,
   IconBrandGithub,
   IconExternalLink,
 } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 
-export async function Footer() {
+export function Footer() {
+  const [year, setYear] = useState(2026);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
-    <footer className="bg-card border-t">
+    <footer
+      style={{ background: tokens.colorNeutralBackground2 }}
+      className="border-t">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <div className="col-span-1 md:col-span-2">
@@ -130,8 +140,7 @@ export async function Footer() {
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} {APP_NAME}. Open source under GPL-3.0
-            License.
+            © {year} {APP_NAME}. Open source under GPL-3.0 License.
           </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
             <a

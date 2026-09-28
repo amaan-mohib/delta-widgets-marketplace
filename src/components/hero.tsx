@@ -1,13 +1,12 @@
 "use client";
 
-// import { handleOAuthSignIn } from "@/app/api/auth/signup/actions";
-// import { authClient, handleOAuthSignIn } from "@/lib/auth/client";
 import {
   Body1,
   Button,
   Tab,
   TabList,
   Title1,
+  Tooltip,
 } from "@fluentui/react-components";
 import {
   ArrowClockwiseRegular,
@@ -16,26 +15,23 @@ import {
   SearchRegular,
   TagRegular,
 } from "@fluentui/react-icons";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-// import { useEffect } from "react";
+import { useTransition } from "react";
 
 interface HeroProps {
-  tab: "discover" | "categories" | "tags";
+  tab: "discover" | "categories" | "tags" | "search";
 }
 
 const Hero: React.FC<HeroProps> = ({ tab }) => {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  // useEffect(() => {
-  //   authClient.getSession().then(({ data }) => {
-  //     console.log(data);
-
-  //     if (data?.session) {
-  //       // setUser(data.session.user);
-  //     }
-  //     // setLoading(false);
-  //   });
-  // }, []);
+  const handleRefresh = () => {
+    startTransition(() => {
+      router.refresh();
+    });
+  };
 
   return (
     <section>
@@ -46,46 +42,50 @@ const Hero: React.FC<HeroProps> = ({ tab }) => {
           to make your own.
         </Body1>
       </div>
-      {/* <button onClick={() => handleOAuthSignIn("google")}>
-        sign in google
-      </button> */}
-      <div className="flex items-center justify-between overflow-auto">
-        <div>
-          <TabList
-            selectedValue={tab}
-            onTabSelect={(_, { value }) => {
-              switch (value) {
-                case "discover":
-                  router.push("/");
-                  break;
-                case "categories":
-                case "tags":
-                  router.push("/" + value);
-                  break;
-                default:
-                  break;
-              }
-            }}>
-            <Tab value="discover" icon={<BoardRegular />}>
-              Discover
-            </Tab>
-            <Tab value="categories" icon={<CollectionsEmptyRegular />}>
-              Categories
-            </Tab>
-            <Tab value="tags" icon={<TagRegular />}>
-              Tags
-            </Tab>
-          </TabList>
+      {tab !== "search" && (
+        <div className="flex items-center overflow-auto flex-wrap">
+          <div className="-ml-3">
+            <TabList selectedValue={tab}>
+              <Link href="/">
+                <Tab value="discover" icon={<BoardRegular />}>
+                  Discover
+                </Tab>
+              </Link>
+              <Link href="/categories">
+                <Tab value="categories" icon={<CollectionsEmptyRegular />}>
+                  Categories
+                </Tab>
+              </Link>
+              <Link href="/tags">
+                <Tab value="tags" icon={<TagRegular />}>
+                  Tags
+                </Tab>
+              </Link>
+            </TabList>
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <Tooltip
+              relationship="label"
+              content={"Search"}
+              positioning={"below"}>
+              <Link href="/search">
+                <Button appearance="subtle" icon={<SearchRegular />} />
+              </Link>
+            </Tooltip>
+            <Tooltip
+              relationship="label"
+              content={"Refresh"}
+              positioning={"below-end"}>
+              <Button
+                appearance="subtle"
+                disabled={isPending}
+                icon={<ArrowClockwiseRegular />}
+                onClick={handleRefresh}
+              />
+            </Tooltip>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            appearance="subtle"
-            icon={<SearchRegular />}
-            onClick={() => router.push("/search")}
-          />
-          <Button appearance="subtle" icon={<ArrowClockwiseRegular />} />
-        </div>
-      </div>
+      )}
     </section>
   );
 };

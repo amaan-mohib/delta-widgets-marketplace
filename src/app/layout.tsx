@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Providers } from "./providers";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { APP_NAME, WEBSITE_URL } from "@/lib/utils";
+import { ThemeProvider } from "../providers/theme-provider";
+import { APP_NAME, WEBSITE_URL } from "@/lib/constants";
 import { Analytics } from "@vercel/analytics/next";
+import AuthProvider from "@/providers/auth-provider";
+import AppProvider from "@/providers/app-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -45,7 +45,10 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: WEBSITE_URL,
     siteName: APP_NAME,
-    title: `${APP_NAME} Gallery`,
+    title: {
+      template: `%s | ${APP_NAME} Gallery`,
+      default: APP_NAME + " Gallery",
+    },
     description:
       "Create beautiful, dynamic desktop widgets without coding. Drag-and-drop builder, custom templates, and real-time data integration.",
     images: [
@@ -65,7 +68,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@amaan_mohib",
     creator: "@amaan_mohib",
-    title: `${APP_NAME} Gallery`,
+    title: {
+      template: `%s | ${APP_NAME} Gallery`,
+      default: APP_NAME + " Gallery",
+    },
     description:
       "Create beautiful, dynamic desktop widgets without coding. Drag-and-drop builder, custom templates, and real-time data integration.",
     images: ["/delta-widgets-icon.png", "/images/design-mode/ss-1.png"],
@@ -87,11 +93,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`dark ${inter.variable}`}>
       <body>
-        <Providers>
-          <Header />
-          {children}
-          <Footer />
-        </Providers>
+        <AuthProvider />
+        <AppProvider />
+        <ThemeProvider>{children}</ThemeProvider>
         <Analytics />
       </body>
     </html>

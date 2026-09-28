@@ -1,4 +1,5 @@
 {
+  "alwaysOnTop": false,
   "dimensions": {
     "height": 238,
     "width": 420
@@ -333,5 +334,13 @@
   ],
   "key": "media",
   "label": "Media",
+  "pinned": false,
+  "position": {
+    "x": 30,
+    "y": 30
+  },
+  "published": true,
+  "publishedAt": 1755283522629,
+  "visible": false,
   "widgetType": "json"
 }

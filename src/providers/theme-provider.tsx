@@ -11,7 +11,7 @@ import {
 import { useServerInsertedHTML } from "next/navigation";
 import { darkTheme } from "@/lib/themes";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [renderer] = React.useState(() => createDOMRenderer());
   const didRenderRef = React.useRef(false);
 

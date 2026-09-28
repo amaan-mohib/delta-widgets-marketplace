@@ -1,4 +1,5 @@
 {
+  "alwaysOnTop": false,
   "dimensions": {
     "height": 135,
     "width": 315
@@ -152,5 +153,13 @@
   ],
   "key": "battery",
   "label": "Battery",
+  "pinned": false,
+  "position": {
+    "x": 30,
+    "y": 30
+  },
+  "published": true,
+  "publishedAt": 1755283491464,
+  "visible": false,
   "widgetType": "json"
 }

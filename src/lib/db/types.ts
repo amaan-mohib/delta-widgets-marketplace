@@ -15,12 +15,16 @@ export enum Table {
   Categories = "categories",
   KnexMigrations = "knex_migrations",
   KnexMigrationsLock = "knex_migrations_lock",
+  Notifications = "notifications",
+  UploadJobFiles = "upload_job_files",
+  UploadJobs = "upload_jobs",
   UserProfiles = "user_profiles",
   Waitlists = "waitlists",
   WidgetAssets = "widget_assets",
-  WidgetCategories = "widget_categories",
+  WidgetAudits = "widget_audits",
   WidgetLikes = "widget_likes",
   WidgetVersionAssets = "widget_version_assets",
+  WidgetVersionCategories = "widget_version_categories",
   WidgetVersions = "widget_versions",
   Widgets = "widgets",
 }
@@ -39,12 +43,16 @@ export type Tables = {
   "categories": Categories,
   "knex_migrations": KnexMigrations,
   "knex_migrations_lock": KnexMigrationsLock,
+  "notifications": Notifications,
+  "upload_job_files": UploadJobFiles,
+  "upload_jobs": UploadJobs,
   "user_profiles": UserProfiles,
   "waitlists": Waitlists,
   "widget_assets": WidgetAssets,
-  "widget_categories": WidgetCategories,
+  "widget_audits": WidgetAudits,
   "widget_likes": WidgetLikes,
   "widget_version_assets": WidgetVersionAssets,
+  "widget_version_categories": WidgetVersionCategories,
   "widget_versions": WidgetVersions,
   "widgets": Widgets,
 };
@@ -167,9 +175,9 @@ export type Categories = {
   id: number;
   slug: string;
   name: string;
-  description: string | null;
   created_at: Date;
   updated_at: Date;
+  count: string | null;
 };
 
 export type KnexMigrations = {
@@ -184,12 +192,43 @@ export type KnexMigrationsLock = {
   is_locked: number | null;
 };
 
+export type Notifications = {
+  id: number;
+  title: string;
+  message: string;
+  link: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type UploadJobFiles = {
+  id: number;
+  job_id: number;
+  status: string;
+  object_key: string;
+  file_name: string;
+  options: string | null;
+  created_at: Date;
+  updated_at: Date;
+  sort_order: number;
+};
+
+export type UploadJobs = {
+  id: number;
+  user_id: string;
+  widget_version_id: number;
+  status: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type UserProfiles = {
   id: number;
   user_id: string;
   username: string;
   created_at: Date;
   updated_at: Date;
+  donation_links: unknown[] | null;
 };
 
 export type Waitlists = {
@@ -201,9 +240,14 @@ export type WidgetAssets = {
   asset_id: number;
 };
 
-export type WidgetCategories = {
-  widget_id: number;
-  category_id: number;
+export type WidgetAudits = {
+  id: number;
+  widget_version_id: number;
+  auditor_id: string | null;
+  action: string;
+  notes: string | null;
+  created_at: Date;
+  updated_at: Date;
 };
 
 export type WidgetLikes = {
@@ -215,6 +259,12 @@ export type WidgetLikes = {
 export type WidgetVersionAssets = {
   widget_version_id: number;
   asset_id: number;
+  sort_order: number;
+};
+
+export type WidgetVersionCategories = {
+  widget_version_id: number;
+  category_id: number;
 };
 
 export type WidgetVersions = {
@@ -226,18 +276,21 @@ export type WidgetVersions = {
   created_at: Date;
   updated_at: Date;
   published_at: Date | null;
+  revision: number | null;
+  label: string;
+  description: string | null;
 };
 
 export type Widgets = {
   id: number;
   author_id: string;
   key: string;
-  label: string;
-  description: string | null;
   widget_type: string;
   download_count: string | null;
   created_at: Date;
   updated_at: Date;
   published_at: Date | null;
+  likes: string | null;
+  latest_version_id: number | null;
 };
 
