@@ -375,7 +375,9 @@ export const finalizeUpload = async (jobId: number) => {
       assetsToInsert.push({
         asset_id: item.object_key.startsWith("asset_id")
           ? Number(item.object_key.replace("asset_id:", ""))
-          : assetIdToKeyMap[item.object_key],
+          : assetIdToKeyMap[
+              process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + item.object_key
+            ],
         sort_order: item.sort_order ?? 0,
       });
     });
