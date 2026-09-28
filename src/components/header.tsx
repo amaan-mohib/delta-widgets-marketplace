@@ -11,6 +11,7 @@ import {
   MenuTrigger,
   Spinner,
   tokens,
+  Tooltip,
 } from "@fluentui/react-components";
 import Link from "next/link";
 import { APP_NAME } from "@/lib/constants";
@@ -20,6 +21,8 @@ import { useMemo } from "react";
 import { useAuth } from "@/store/use-auth";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/client";
+import { ArrowLeftRegular } from "@fluentui/react-icons";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   isDashboard?: boolean;
@@ -28,6 +31,8 @@ interface HeaderProps {
 
 export function Header({ isDashboard, isUpload }: HeaderProps) {
   const { user, loading: userLoading } = useAuth();
+  const isInApp = useDataStore((s) => s.isInApp);
+  const router = useRouter();
 
   const headerAction = useMemo(() => {
     return (
@@ -106,6 +111,18 @@ export function Header({ isDashboard, isUpload }: HeaderProps) {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-(--header-height) items-center justify-between">
           <div className="flex items-center">
+            {isInApp && (
+              <Tooltip relationship="label" content="Go back">
+                <Button
+                  icon={<ArrowLeftRegular />}
+                  appearance="subtle"
+                  style={{ marginRight: 10 }}
+                  onClick={() => {
+                    router.back();
+                  }}
+                />
+              </Tooltip>
+            )}
             <Link href="/" className="shrink-0 flex items-center space-x-3">
               <Image
                 width={24}

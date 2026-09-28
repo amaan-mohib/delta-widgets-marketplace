@@ -14,7 +14,7 @@ import {
 import WidgetCard from "@/components/widget-card";
 import { useAuth } from "@/store/use-auth";
 import Pagination from "@/components/pagination";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import WidgetGrid from "@/components/widget-grid";
 import Link from "next/link";
 import { ArrowRightRegular } from "@fluentui/react-icons";
@@ -31,7 +31,10 @@ const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
     Awaited<ReturnType<typeof getUserWidgets>>
   >({ widgets: [], total: 0 });
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  const afterUpload = searchParams.get("afterUpload") === "true";
 
   const getWidgets = async () => {
     try {
@@ -62,6 +65,20 @@ const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
       <div className="mb-5">
         <Title1>My Widgets</Title1>
       </div>
+      {afterUpload && (
+        <div className="mb-5">
+          <MessageBar layout="multiline" intent="success">
+            <MessageBarBody>
+              <MessageBarTitle>
+                Your widget(s) has been submitted for review.
+              </MessageBarTitle>
+              We'll contact you by email if any changes or additional
+              information are needed. Please check your inbox and spam folder
+              for updates.
+            </MessageBarBody>
+          </MessageBar>
+        </div>
+      )}
       {profile?.donation_links?.length === 0 && (
         <div className="mb-5">
           <MessageBar layout="multiline">
