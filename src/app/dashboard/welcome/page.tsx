@@ -1,3 +1,4 @@
+import { Header } from "@/components/header";
 import WelcomePage from "@/components/welcome";
 import { Metadata } from "next";
 
@@ -8,7 +9,12 @@ export const metadata: Metadata = {
 };
 
 const Welcome = () => {
-  return <WelcomePage />;
+  return (
+    <>
+      <Header isDashboard />
+      <WelcomePage />
+    </>
+  );
 };
 
 export default Welcome;

@@ -355,7 +355,7 @@ export const finalizeUpload = async (jobId: number) => {
           const options = JSON.parse(file.options || "{}");
           return {
             file_name: file.file_name,
-            src: file.object_key,
+            src: process.env.NEXT_PUBLIC_CF_R2_SRC_PREFIX + file.object_key,
             asset_type: options.type,
             content_type: options.contentType,
             size: output[index]?.ContentLength,

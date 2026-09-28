@@ -47,7 +47,7 @@ const UploadFormFooter: React.FC<UploadFormFooterProps> = () => {
 
   useEffect(() => {
     if (uploaded.length === selectedWidgets.length) {
-      router.push("/dashboard/my-widgets", { scroll: false });
+      router.push("/dashboard/my-widgets?afterUpload=true", { scroll: false });
     }
   }, [uploaded, selectedWidgets]);
 
