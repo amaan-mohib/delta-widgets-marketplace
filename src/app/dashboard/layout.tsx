@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/store/use-auth";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Header } from "@/components/header";
 import { Spinner } from "@fluentui/react-components";
@@ -10,16 +10,22 @@ const DashboardLayout = ({ children }: LayoutProps<"/dashboard">) => {
   const { loading, user, profile } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (loading) return;
 
+    const searchStr = searchParams.toString();
+    const redirectTo = encodeURIComponent(
+      pathname + (searchStr ? `?${searchStr}` : ""),
+    );
+
     if (!user) {
-      router.replace("/login?redirect=" + pathname);
+      router.replace("/login?redirect=" + redirectTo);
       return;
     }
     if (!profile) {
-      router.replace("/dashboard/welcome?redirect=" + pathname);
+      router.replace("/dashboard/welcome?redirect=" + redirectTo);
     }
   }, [user, profile, loading]);
 
