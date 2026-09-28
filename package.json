@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "knex migrate:latest && next build --debug-prerender",
+    "build": "knex migrate:latest && next build",
     "start": "next start",
     "lint": "eslint",
     "create:migration": "knex migrate:make",
