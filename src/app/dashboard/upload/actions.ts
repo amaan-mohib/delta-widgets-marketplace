@@ -362,6 +362,8 @@ export const finalizeUpload = async (jobId: number) => {
           };
         }),
       )
+      .onConflict("src")
+      .merge()
       .returning("*")
       .transacting(trx);
 
