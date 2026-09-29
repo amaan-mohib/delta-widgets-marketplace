@@ -19,14 +19,6 @@ const Homepage: React.FC<HomepageProps> = ({
 }) => {
   return (
     <div>
-      <div className="mt-5">
-        <Subtitle1>Trending</Subtitle1>
-      </div>
-      <WidgetGrid className="py-5">
-        {trending.map((item) => (
-          <WidgetCard key={item.key} widget={item} />
-        ))}
-      </WidgetGrid>
       {newWidgets.length > 0 && (
         <>
           <div className="mt-5">
@@ -34,6 +26,18 @@ const Homepage: React.FC<HomepageProps> = ({
           </div>
           <WidgetGrid className="py-5">
             {newWidgets.map((item) => (
+              <WidgetCard key={item.key} widget={item} />
+            ))}
+          </WidgetGrid>
+        </>
+      )}
+      {trending.length > 0 && (
+        <>
+          <div className="mt-5">
+            <Subtitle1>Trending</Subtitle1>
+          </div>
+          <WidgetGrid className="py-5">
+            {trending.map((item) => (
               <WidgetCard key={item.key} widget={item} />
             ))}
           </WidgetGrid>
