@@ -11,8 +11,8 @@ const Widgets = async () => {
     getWidgets("download_count"),
   ]);
 
-  const filteredNew = newWidgets.filter(
-    (w) => !trending.map((t) => t.key).includes(w.key),
+  const filteredTrending = newWidgets.filter(
+    (w) => !newWidgets.map((t) => t.key).includes(w.key),
   );
   const filteredPopular = popular.filter(
     (w) => ![...trending, ...newWidgets].map((t) => t.key).includes(w.key),
@@ -20,8 +20,8 @@ const Widgets = async () => {
 
   return (
     <Homepage
-      trending={trending}
-      newWidgets={filteredNew}
+      newWidgets={newWidgets}
+      trending={filteredTrending}
       popular={filteredPopular}
     />
   );
