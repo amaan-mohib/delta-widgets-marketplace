@@ -341,3 +341,20 @@ export const updateDownloadCount = async (
     updateTag(`widget-${key}-${version}`);
   }
 };
+
+export const deleteWidget = async (
+  id: number,
+  key: string,
+  version?: string | null,
+) => {
+  const user = await getAuthUser();
+  if (!user || user.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+
+  await models.Widgets().where("id", id).del();
+  updateTag(`widget-${key}`);
+  if (version) {
+    updateTag(`widget-${key}-${version}`);
+  }
+};

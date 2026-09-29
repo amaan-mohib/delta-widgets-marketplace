@@ -500,6 +500,8 @@ export const getAvailableTags = async () => {
   return await models
     .Categories()
     .select("id", "slug")
+    .where("slug", "<>", "preinstalled")
     .limit(20)
-    .orderBy("count", "desc");
+    .orderBy("count", "desc")
+    .orderBy("name", "asc");
 };
