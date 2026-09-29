@@ -5,6 +5,13 @@ import {
   Badge,
   Body1,
   Button,
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogContent,
+  DialogSurface,
+  DialogTitle,
+  DialogTrigger,
   Divider,
   Select,
   Spinner,
@@ -24,7 +31,12 @@ import {
 import { focusMainWindow, getStatusText } from "@/lib/utils";
 import { useAuth } from "@/store/use-auth";
 import { useDataStore } from "@/store/use-data-store";
-import { getIfUserLiked, likeAction, updateDownloadCount } from "../actions";
+import {
+  deleteWidget,
+  getIfUserLiked,
+  likeAction,
+  updateDownloadCount,
+} from "../actions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import DonationDialog from "@/components/donation-dialog";
 import { DEEP_LINK_BASE_URL } from "@/lib/constants";
@@ -313,6 +325,40 @@ const Hero: React.FC<HeroProps> = ({
           }}>
           Share
         </Button>
+        {user?.role === "admin" && version.status !== "PUBLISHED" && (
+          <Dialog>
+            <DialogTrigger disableButtonEnhancement>
+              <Button>Delete widget</Button>
+            </DialogTrigger>
+            <DialogSurface>
+              <DialogBody>
+                <DialogTitle>Delete {version.label}</DialogTitle>
+                <DialogContent>
+                  This action is permanent. Are you sure you want to continue?
+                </DialogContent>
+                <DialogActions>
+                  <DialogTrigger disableButtonEnhancement>
+                    <Button
+                      appearance="primary"
+                      onClick={async () => {
+                        await deleteWidget(
+                          widget.id,
+                          widget.key,
+                          version.version,
+                        );
+                        router.replace("/dashboard");
+                      }}>
+                      Delete widget
+                    </Button>
+                  </DialogTrigger>
+                  <DialogTrigger disableButtonEnhancement>
+                    <Button appearance="secondary">Cancel</Button>
+                  </DialogTrigger>
+                </DialogActions>
+              </DialogBody>
+            </DialogSurface>
+          </Dialog>
+        )}
       </div>
       {tags.length > 0 && (
         <div className="flex items-center flex-wrap gap-2 mt-5">
