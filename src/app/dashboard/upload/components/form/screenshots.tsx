@@ -88,7 +88,7 @@ const FormScreenshots: React.FC<FormScreenshotsProps> = ({
       }
       await setTimeoutAsync(2000);
       const customName = `capture-${new Date().getTime()}.png`;
-      await commands.captureWidgetScreenshot({
+      const imgPath = await commands.captureWidgetScreenshot({
         label,
         manifestPath: selectedWidget.manifestPath,
         refresh: true,
@@ -97,12 +97,15 @@ const FormScreenshots: React.FC<FormScreenshotsProps> = ({
       if (!visible) {
         await closeWidgetWindow(label);
       }
-      const newScreenshots = await getWidgetScreenshots(
-        selectedWidget,
-        true,
-        customName,
-      );
-      onChange([...screenshots, ...newScreenshots]);
+      const info = await lstat(imgPath);
+      onChange([
+        ...screenshots,
+        {
+          fileName: customName,
+          path: imgPath,
+          fileSize: info.size,
+        },
+      ]);
       setCaptureLoading(false);
     } catch (error) {
       setCaptureLoading(false);
