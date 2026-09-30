@@ -3,14 +3,14 @@
 import RootLayout from "@/components/root-layout";
 import WaitlistPage from "@/components/waitlist";
 import { Metadata } from "next";
-// import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Waitlist",
 };
 
 const Waitlist = async () => {
-  // redirect("/");
+  redirect("/");
 
   return (
     <RootLayout>
