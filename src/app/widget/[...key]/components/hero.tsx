@@ -185,6 +185,7 @@ const Hero: React.FC<HeroProps> = ({
         key: widget.key,
         files,
       });
+      await emitTo("main", "focus-widget", widget.key);
       await updateDownloadCount(widget.id, widget.key, version.version);
       setInstalling(false);
     } catch (error) {
