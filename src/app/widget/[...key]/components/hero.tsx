@@ -20,7 +20,7 @@ import {
   Tooltip,
 } from "@fluentui/react-components";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowDownloadRegular,
   HeartFilled,
@@ -96,6 +96,7 @@ const Hero: React.FC<HeroProps> = ({
     needsUpdate: false,
   });
   const [installing, setInstalling] = useState(false);
+  const autoInstallStarted = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -133,17 +134,6 @@ const Hero: React.FC<HeroProps> = ({
     getStatus();
   }, [isInApp, version]);
 
-  useEffect(() => {
-    if (!isInApp || installing) return;
-
-    const autoInstall = searchParams.get("install") === "true";
-    if (autoInstall) {
-      setTimeout(() => {
-        onInstall();
-      }, 1000);
-    }
-  }, [isInApp, searchParams, installing]);
-
   const onLike = async () => {
     if (!user && !clientId) return;
 
@@ -158,7 +148,7 @@ const Hero: React.FC<HeroProps> = ({
     });
   };
 
-  const onInstall = async () => {
+  const onInstall = useCallback(async () => {
     if (version.status !== "PUBLISHED" || installing) return;
     if (!isInApp) {
       window.open(`${DEEP_LINK_BASE_URL}install?key=${widget.key}`);
@@ -202,7 +192,31 @@ const Hero: React.FC<HeroProps> = ({
       alert("Failed to install widget");
       setInstalling(false);
     }
-  };
+  }, [
+    assets,
+    installStatus.installed,
+    installStatus.needsUpdate,
+    installing,
+    isInApp,
+    version.status,
+    version.version,
+    widget.id,
+    widget.key,
+  ]);
+
+  useEffect(() => {
+    if (!isInApp || installing || autoInstallStarted.current) return;
+
+    const autoInstall = searchParams.get("install") === "true";
+    if (!autoInstall) return;
+
+    const timeout = setTimeout(() => {
+      autoInstallStarted.current = true;
+      onInstall();
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [isInApp, installing, onInstall, searchParams]);
 
   return (
     <section className="mt-5">
