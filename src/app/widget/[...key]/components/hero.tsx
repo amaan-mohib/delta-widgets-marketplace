@@ -28,7 +28,7 @@ import {
   RibbonStarRegular,
   ShareRegular,
 } from "@fluentui/react-icons";
-import { focusMainWindow, getStatusText } from "@/lib/utils";
+import { focusMainWindow, getStatusText, setTimeoutAsync } from "@/lib/utils";
 import { useAuth } from "@/store/use-auth";
 import { useDataStore } from "@/store/use-data-store";
 import {
@@ -185,8 +185,9 @@ const Hero: React.FC<HeroProps> = ({
         key: widget.key,
         files,
       });
-      await emitTo("main", "focus-widget", widget.key);
       await updateDownloadCount(widget.id, widget.key, version.version);
+      await setTimeoutAsync(1000);
+      await emitTo("main", "focus-widget", widget.key);
       setInstalling(false);
     } catch (error) {
       console.error(error);
