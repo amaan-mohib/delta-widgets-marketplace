@@ -175,7 +175,10 @@ const updateWidgetStatus = async (
     } else {
       await models
         .Widgets()
-        .update({ latest_version_id: widgetVersion.id })
+        .update({
+          latest_version_id: widgetVersion.id,
+          published_at: trx.fn.now(),
+        })
         .where("id", widgetVersion.widget_id)
         .transacting(trx);
     }
@@ -194,6 +197,7 @@ const updateWidgetStatus = async (
       .where("id", widgetVersion.widget_id)
       .update({
         latest_version_id: latestPublishedVersion?.id ?? null,
+        published_at: latestPublishedVersion ? trx.fn.now() : null,
       })
       .transacting(trx);
   }

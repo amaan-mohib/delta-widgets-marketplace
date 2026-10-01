@@ -12,7 +12,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .orderBy("count", "desc"),
     models
       .Widgets("w")
-      .select("w.id", "w.key", "w.published_at")
+      .select(
+        "w.id",
+        "w.key",
+        "w.published_at",
+        "wv.published_at as version_published_at",
+      )
       .join({ wv: Table.WidgetVersions }, "wv.id", "w.latest_version_id")
       .where("wv.status", "PUBLISHED")
       .orderBy("w.created_at", "desc"),
@@ -52,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })) as MetadataRoute.Sitemap),
     ...(widgets.map((w) => ({
       url: WEBSITE_URL + "/widget/" + w.key,
-      lastModified: new Date(w.published_at),
+      lastModified: new Date(w.published_at || w.version_published_at),
       changeFrequency: "monthly",
       priority: 1,
     })) as MetadataRoute.Sitemap),
