@@ -102,17 +102,19 @@ const Screenshots: React.FC<ScreenshotsProps> = ({ screenshots }) => {
         </CarouselSlider>
       </CarouselViewport>
 
-      <CarouselNavContainer
-        layout="inline"
-        autoplayTooltip={{ content: "Autoplay", relationship: "label" }}
-        nextTooltip={{ content: "Go to next", relationship: "label" }}
-        prevTooltip={{ content: "Go to prev", relationship: "label" }}>
-        <CarouselNav>
-          {(index) => (
-            <CarouselNavButton aria-label={`Carousel Nav Button ${index}`} />
-          )}
-        </CarouselNav>
-      </CarouselNavContainer>
+      {screenshots.length > 1 && (
+        <CarouselNavContainer
+          layout="inline"
+          autoplayTooltip={{ content: "Autoplay", relationship: "label" }}
+          nextTooltip={{ content: "Go to next", relationship: "label" }}
+          prevTooltip={{ content: "Go to prev", relationship: "label" }}>
+          <CarouselNav>
+            {(index) => (
+              <CarouselNavButton aria-label={`Carousel Nav Button ${index}`} />
+            )}
+          </CarouselNav>
+        </CarouselNavContainer>
+      )}
     </Carousel>
   );
 };
