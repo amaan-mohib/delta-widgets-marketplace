@@ -11,10 +11,6 @@ const AdminLayout = async ({ children }: LayoutProps<"/dashboard/admin">) => {
     redirect("/login?redirect=/dashboard/admin");
   }
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <>
       <div className="sticky top-0 w-full z-99">

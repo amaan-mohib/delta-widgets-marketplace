@@ -1,6 +1,7 @@
 "use client"; // Error boundaries must be Client Components
 
 import RootLayout from "@/components/root-layout";
+import { Button } from "@fluentui/react-components";
 import { useEffect } from "react";
 
 export default function ErrorPage({
@@ -17,15 +18,16 @@ export default function ErrorPage({
 
   return (
     <RootLayout>
-      <main>
+      <main className="flex flex-col gap-2 w-full items-center justify-center">
         <h2>Something went wrong!</h2>
-        <button
+        <Button
+          appearance="primary"
           onClick={
             // Attempt to recover by re-fetching and re-rendering the segment
             () => retry()
           }>
           Try again
-        </button>
+        </Button>
       </main>
     </RootLayout>
   );

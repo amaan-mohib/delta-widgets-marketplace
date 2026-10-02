@@ -11,7 +11,7 @@ const PAGE_SIZE = 30;
 export const getUserWidgets = async (page: number, pageSize?: number) => {
   const user = await getAuthUser();
   if (!user) {
-    redirect("/login");
+    redirect("/login?redirect=/dashboard/my-widgets");
   }
 
   pageSize = pageSize || PAGE_SIZE;
