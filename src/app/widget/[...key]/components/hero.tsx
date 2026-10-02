@@ -192,7 +192,7 @@ const Hero: React.FC<HeroProps> = ({
         const assetsDir = await path.join(
           await appDataDir(),
           "widgets",
-          widget.key,
+          widget.key.replace(/\//g, "-"),
           "assets",
         );
         const entries = await readDir(assetsDir);
