@@ -45,6 +45,7 @@ import { path } from "@tauri-apps/api";
 import { appDataDir } from "@tauri-apps/api/path";
 import { exists, readTextFile } from "@tauri-apps/plugin-fs";
 import { emitTo } from "@tauri-apps/api/event";
+import WidgetEdit from "./edit";
 
 const getInstalledStatus = async (key: string, version?: string | null) => {
   const widgetDir = await path.join(
@@ -96,6 +97,7 @@ const Hero: React.FC<HeroProps> = ({
     needsUpdate: false,
   });
   const [installing, setInstalling] = useState(false);
+  const [editing, setEditing] = useState(false);
   const autoInstallStarted = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -342,38 +344,41 @@ const Hero: React.FC<HeroProps> = ({
           Share
         </Button>
         {user?.role === "admin" && version.status !== "PUBLISHED" && (
-          <Dialog>
-            <DialogTrigger disableButtonEnhancement>
-              <Button>Delete widget</Button>
-            </DialogTrigger>
-            <DialogSurface>
-              <DialogBody>
-                <DialogTitle>Delete {version.label}</DialogTitle>
-                <DialogContent>
-                  This action is permanent. Are you sure you want to continue?
-                </DialogContent>
-                <DialogActions>
-                  <DialogTrigger disableButtonEnhancement>
-                    <Button
-                      appearance="primary"
-                      onClick={async () => {
-                        await deleteWidget(
-                          widget.id,
-                          widget.key,
-                          version.version,
-                        );
-                        router.replace("/dashboard");
-                      }}>
-                      Delete widget
-                    </Button>
-                  </DialogTrigger>
-                  <DialogTrigger disableButtonEnhancement>
-                    <Button appearance="secondary">Cancel</Button>
-                  </DialogTrigger>
-                </DialogActions>
-              </DialogBody>
-            </DialogSurface>
-          </Dialog>
+          <>
+            <Dialog>
+              <DialogTrigger disableButtonEnhancement>
+                <Button>Delete widget</Button>
+              </DialogTrigger>
+              <DialogSurface>
+                <DialogBody>
+                  <DialogTitle>Delete {version.label}</DialogTitle>
+                  <DialogContent>
+                    This action is permanent. Are you sure you want to continue?
+                  </DialogContent>
+                  <DialogActions>
+                    <DialogTrigger disableButtonEnhancement>
+                      <Button
+                        appearance="primary"
+                        onClick={async () => {
+                          await deleteWidget(
+                            widget.id,
+                            widget.key,
+                            version.version,
+                          );
+                          router.replace("/dashboard");
+                        }}>
+                        Delete widget
+                      </Button>
+                    </DialogTrigger>
+                    <DialogTrigger disableButtonEnhancement>
+                      <Button appearance="secondary">Cancel</Button>
+                    </DialogTrigger>
+                  </DialogActions>
+                </DialogBody>
+              </DialogSurface>
+            </Dialog>
+            <Button onClick={() => setEditing(true)}>Edit Widget</Button>
+          </>
         )}
       </div>
       {tags.length > 0 && (
@@ -389,6 +394,14 @@ const Hero: React.FC<HeroProps> = ({
             </Button>
           ))}
         </div>
+      )}
+      {editing && (
+        <WidgetEdit
+          widget={widget}
+          version={version}
+          tags={tags}
+          onClose={() => setEditing(false)}
+        />
       )}
     </section>
   );

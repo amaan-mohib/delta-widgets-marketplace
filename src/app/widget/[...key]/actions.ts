@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthUser } from "@/app/actions";
+import { upsertTags } from "@/app/dashboard/upload/actions";
 import db, { Table, WidgetVersions } from "@/lib/db";
 import models from "@/lib/db/models";
 import { notifyWidgetStatusChanged } from "@/lib/emails";
@@ -197,7 +198,7 @@ const updateWidgetStatus = async (
       .where("id", widgetVersion.widget_id)
       .update({
         latest_version_id: latestPublishedVersion?.id ?? null,
-        published_at: latestPublishedVersion ? trx.fn.now() : null,
+        published_at: latestPublishedVersion?.published_at ?? null,
       })
       .transacting(trx);
   }
@@ -360,5 +361,47 @@ export const deleteWidget = async (
   updateTag(`widget-${key}`);
   if (version) {
     updateTag(`widget-${key}-${version}`);
+  }
+};
+
+export const updateWidget = async (
+  widgetVersionId: number,
+  values: { label: string; description: string; tagsStr: string },
+  key: string,
+) => {
+  const user = await getAuthUser();
+  if (!user || user.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+  const widgetVersion = await models
+    .WidgetVersions()
+    .where("id", widgetVersionId)
+    .first();
+  if (!widgetVersion) {
+    throw new Error("No widget version found");
+  }
+
+  const trx = await db.transaction();
+  try {
+    await models
+      .WidgetVersions()
+      .update({
+        label: values.label,
+        description: values.description,
+      })
+      .where("id", widgetVersionId)
+      .transacting(trx);
+    await upsertTags(values.tagsStr.split(","), widgetVersionId, trx);
+
+    await trx.commit();
+  } catch (error) {
+    await trx.rollback();
+    console.error(error);
+    throw new Error("Something went wrong while editing widget");
+  }
+
+  updateTag(`widget-${key}`);
+  if (widgetVersion) {
+    updateTag(`widget-${key}-${widgetVersion.version}`);
   }
 };
