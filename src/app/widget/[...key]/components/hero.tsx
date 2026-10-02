@@ -189,7 +189,7 @@ const Hero: React.FC<HeroProps> = ({
       });
       await updateDownloadCount(widget.id, widget.key, version.version);
       await setTimeoutAsync(1000);
-      if (files.assets && widget.widget_type === "json") {
+      if (files.assets && widget.widget_type === "JSON") {
         const assetsDir = await path.join(
           await appDataDir(),
           "widgets",
