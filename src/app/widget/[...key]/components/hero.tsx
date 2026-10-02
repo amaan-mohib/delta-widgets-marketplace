@@ -188,6 +188,7 @@ const Hero: React.FC<HeroProps> = ({
         files,
       });
       await updateDownloadCount(widget.id, widget.key, version.version);
+      await setTimeoutAsync(1000);
       if (files.assets && widget.widget_type === "json") {
         const assetsDir = await path.join(
           await appDataDir(),
@@ -199,13 +200,12 @@ const Hero: React.FC<HeroProps> = ({
         for (const entry of entries) {
           if (entry.isFile) {
             await commands.copyCustomAssets({
-              key: widget.key,
+              key: entry.name,
               path: await path.join(assetsDir, entry.name),
             });
           }
         }
       }
-      await setTimeoutAsync(1000);
       await emitTo("main", "focus-widget", widget.key);
       setInstalling(false);
     } catch (error) {
