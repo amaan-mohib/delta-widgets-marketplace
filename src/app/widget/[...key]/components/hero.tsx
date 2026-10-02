@@ -43,7 +43,7 @@ import { DEEP_LINK_BASE_URL } from "@/lib/constants";
 import { commands, IDownloadWidgetParams } from "@/lib/commands";
 import { path } from "@tauri-apps/api";
 import { appDataDir } from "@tauri-apps/api/path";
-import { exists, readTextFile } from "@tauri-apps/plugin-fs";
+import { exists, readDir, readTextFile } from "@tauri-apps/plugin-fs";
 import { emitTo } from "@tauri-apps/api/event";
 import WidgetEdit from "./edit";
 
@@ -188,6 +188,23 @@ const Hero: React.FC<HeroProps> = ({
         files,
       });
       await updateDownloadCount(widget.id, widget.key, version.version);
+      if (files.assets && widget.widget_type === "json") {
+        const assetsDir = await path.join(
+          await appDataDir(),
+          "widgets",
+          widget.key,
+          "assets",
+        );
+        const entries = await readDir(assetsDir);
+        for (const entry of entries) {
+          if (entry.isFile) {
+            await commands.copyCustomAssets({
+              key: widget.key,
+              path: await path.join(assetsDir, entry.name),
+            });
+          }
+        }
+      }
       await setTimeoutAsync(1000);
       await emitTo("main", "focus-widget", widget.key);
       setInstalling(false);
