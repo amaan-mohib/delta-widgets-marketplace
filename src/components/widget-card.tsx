@@ -11,6 +11,7 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import { IconDownload, IconHeart } from "@tabler/icons-react";
+import Link from "next/link";
 
 export interface WidgetCardProps {
   widget: {
@@ -28,7 +29,7 @@ export interface WidgetCardProps {
 
 const WidgetCard: React.FC<WidgetCardProps> = ({ widget, showStatus }) => {
   return (
-    <a href={`/widget/${widget.key}`}>
+    <Link href={`/widget/${widget.key}`}>
       <Card
         size="small"
         appearance="filled-alternative"
@@ -64,7 +65,7 @@ const WidgetCard: React.FC<WidgetCardProps> = ({ widget, showStatus }) => {
           </div>
         </div>
       </Card>
-    </a>
+    </Link>
   );
 };
 
