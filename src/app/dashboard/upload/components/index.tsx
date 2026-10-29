@@ -58,7 +58,7 @@ const UploadPage: React.FC<UploadPageProps> = () => {
     };
 
     init();
-  }, [isInApp, searchParams]);
+  }, [isInApp]);
 
   if (!isInApp) {
     return (
