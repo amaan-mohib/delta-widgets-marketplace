@@ -18,7 +18,7 @@ interface UploadPageProps {}
 
 const UploadPage: React.FC<UploadPageProps> = () => {
   const [widgets, setWidgets] = useState<IGetAllWidget[]>([]);
-  const { isInApp } = useDataStore();
+  const isInApp = useDataStore((s) => s.isInApp);
   const uploadStep = useUploadStore((s) => s.uploadStep);
   const searchParams = useSearchParams();
 

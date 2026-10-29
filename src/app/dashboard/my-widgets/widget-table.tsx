@@ -9,6 +9,7 @@ import {
   MessageBarBody,
   MessageBarTitle,
   Spinner,
+  Text,
   Title1,
 } from "@fluentui/react-components";
 import WidgetCard from "@/components/widget-card";
@@ -79,7 +80,7 @@ const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
           </MessageBar>
         </div>
       )}
-      {profile?.donation_links?.length === 0 && (
+      {profile?.donation_links?.length === 0 && widgets.length > 0 && (
         <div className="mb-5">
           <MessageBar layout="multiline">
             <MessageBarBody>
@@ -102,6 +103,7 @@ const WidgetTable: React.FC<WidgetTableProps> = ({ page }) => {
           </MessageBar>
         </div>
       )}
+      {widgets.length === 0 && <Text>No widgets published yet</Text>}
       <WidgetGrid className="pb-5">
         {widgets.map((widget) => (
           <WidgetCard
