@@ -13,7 +13,7 @@ import {
   Input,
   Title1,
 } from "@fluentui/react-components";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import z from "zod";
 
@@ -30,7 +30,6 @@ interface WelcomePageProps {}
 
 const WelcomePage: React.FC<WelcomePageProps> = () => {
   const { user, profile } = useAuth();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
@@ -52,9 +51,7 @@ const WelcomePage: React.FC<WelcomePageProps> = () => {
       setUsername(usernameFromEmail);
       return;
     }
-    const redirectTo = searchParams.get("redirect");
-    router.replace(redirectTo || "/dashboard");
-  }, [profile, user, searchParams]);
+  }, [profile, user]);
 
   const validateUsername = async (username: string) => {
     if (!username || !username.trim() || loading) return;
@@ -97,6 +94,8 @@ const WelcomePage: React.FC<WelcomePageProps> = () => {
       const profile = await createUsername(username);
       if (profile) {
         useAuth.setState({ profile });
+        const redirectTo = searchParams.get("redirect");
+        window.location.href = redirectTo || "/dashboard";
       } else {
         setLoading(false);
       }

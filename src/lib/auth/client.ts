@@ -11,8 +11,7 @@ export const handleOAuthSignIn = async (
   try {
     await authClient.signIn.social({
       provider,
-      callbackURL: callbackURL || "/dashboard",
-      newUserCallbackURL: "/dashboard/welcome",
+      callbackURL: `/login?redirect=${encodeURIComponent(callbackURL || "/dashboard")}`,
       errorCallbackURL: "/error",
       additionalData: { prompt: "select_account" }, // doesn't work
     });

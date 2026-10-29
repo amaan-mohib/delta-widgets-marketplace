@@ -6,7 +6,7 @@ export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const searchStr = searchParams.toString();
   const redirectTo = encodeURIComponent(
-    pathname + (searchStr ? `?${searchStr}` : ""),
+    pathname + (searchStr ? `&${searchStr}` : ""),
   );
 
   if (!user) {
@@ -14,10 +14,17 @@ export async function proxy(request: NextRequest) {
       new URL("/login?redirect=" + redirectTo, request.url),
     );
   }
-  if (!user.profile || !user.profile.username) {
+  if (
+    (!user.profile || !user.profile.username) &&
+    pathname !== "/dashboard/welcome"
+  ) {
     return NextResponse.redirect(
       new URL("/dashboard/welcome?redirect=" + redirectTo, request.url),
     );
+  }
+
+  if (pathname === "/dashboard/welcome" && user.profile?.username) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
